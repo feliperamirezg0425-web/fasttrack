@@ -116,10 +116,34 @@ html,body{background:#0a0e14 !important;color:#e8f0fe !important;min-height:100v
 .cin:focus{border-color:#a855f7;}
 .csend{background:linear-gradient(135deg,#a855f7,#6366f1);border:none;border-radius:12px;padding:10px 16px;color:#fff;font-size:16px;cursor:pointer;flex-shrink:0;}
 .csend:disabled{opacity:.4;}
+/* GARMIN SCAN */
+.scan-btn{background:rgba(0,229,160,.1);border:1px solid rgba(0,229,160,.3);color:#00e5a0;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;margin-top:6px;width:100%;}
+.scan-btn:active{background:rgba(0,229,160,.25);}
+.scanning-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;}
+.scanning-overlay.on{display:flex;}
+.scan-spinner{width:50px;height:50px;border:4px solid #1e2d42;border-top-color:#00e5a0;border-radius:50%;animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.scan-txt{color:#e8f0fe;font-size:14px;font-weight:700;}
+/* VOICE & PHOTO BUTTONS */
+.cmic{background:#1a2333;border:1px solid #1e2d42;border-radius:12px;padding:10px 12px;color:#5a7090;font-size:16px;cursor:pointer;flex-shrink:0;transition:all .2s;}
+.cmic.recording{background:rgba(255,107,53,.2);border-color:#ff6b35;color:#ff6b35;}
+.cphoto{background:#1a2333;border:1px solid #1e2d42;border-radius:12px;padding:10px 12px;color:#5a7090;font-size:16px;cursor:pointer;flex-shrink:0;}
+.cphoto:active{border-color:#a855f7;color:#a855f7;}
+/* PATTERN ANALYSIS */
+.pattern-card{background:#111720;border:1px solid rgba(168,85,247,.25);border-radius:18px;padding:16px;margin-bottom:14px;}
+.pattern-result{font-size:13px;color:#e8f0fe;line-height:1.6;margin-top:12px;padding:12px;background:#1a2333;border-radius:10px;min-height:60px;}
+.pattern-btn{background:linear-gradient(135deg,#a855f7,#6366f1);border:none;border-radius:12px;padding:12px;font-size:13px;font-weight:800;color:#fff;cursor:pointer;width:100%;}
+.pattern-btn:disabled{opacity:.5;}
+
 </style>
 </head>
 <body>
 <div class="app">
+<div class="scanning-overlay" id="scanOverlay">
+  <div class="scan-spinner"></div>
+  <div class="scan-txt">Reading Garmin data...</div>
+  <div style="font-size:11px;color:#5a7090;">AI is analyzing your watch</div>
+</div>
 <div class="nav">
   <button class="nb on" onclick="sp('dash')"><span class="ni">&#9632;</span>Dashboard</button>
   <button class="nb" onclick="sp('fast')"><span class="ni">&#9203;</span>Fast</button>
@@ -203,6 +227,12 @@ html,body{background:#0a0e14 !important;color:#e8f0fe !important;min-height:100v
 <!-- HISTORY -->
 <div class="pg" id="pg-hist">
   <div class="ph" style="margin-top:4px;"><div style="font-size:18px;font-weight:800;color:#e8f0fe;">History</div><button style="background:#1a2333;border:1px solid #1e2d42;border-radius:10px;padding:5px 12px;color:#5a7090;font-size:11px;cursor:pointer;" onclick="renderHistory()">Refresh</button></div>
+  <div class="pattern-card">
+    <div class="ct">&#129302; AI Pattern Analysis</div>
+    <div style="font-size:12px;color:#5a7090;margin-bottom:10px;line-height:1.5;">Claude analyzes your fasting, running, and weight data to find patterns and give you personalized recommendations.</div>
+    <button class="pattern-btn" id="patternBtn" onclick="analyzePatterns()">&#129302; Analyze My Patterns</button>
+    <div class="pattern-result" id="patternResult" style="display:none;"></div>
+  </div>
   <div class="card" id="run-charts-card" style="display:none;">
     <div class="ct">&#127939; Run Charts</div>
     <div style="font-size:11px;color:#5a7090;margin-bottom:6px;">Distance per run (km)</div>
@@ -211,6 +241,9 @@ html,body{background:#0a0e14 !important;color:#e8f0fe !important;min-height:100v
     <div style="font-size:11px;color:#5a7090;margin:12px 0 6px;">Time per run (minutes)</div>
     <div class="chart-w"><svg id="time-chart" class="chart-s"></svg></div>
     <div class="chart-l" id="time-labels"></div>
+    <div style="font-size:11px;color:#5a7090;margin:12px 0 6px;" id="pace-chart-lbl" style="display:none;">Pace per run (min/km)</div>
+    <div class="chart-w" id="pace-chart-wrap" style="display:none;"><svg id="pace-chart" class="chart-s"></svg></div>
+    <div class="chart-l" id="pace-labels"></div>
   </div>
   <div id="hist-content"></div>
 </div>
@@ -240,7 +273,9 @@ html,body{background:#0a0e14 !important;color:#e8f0fe !important;min-height:100v
       <div class="cmsg ai">Hi! I am your FastTrack health assistant. I know your fasting stats, Lisfranc recovery status, weight, and run plan. Ask me anything! &#128170;</div>
     </div>
     <div class="cinrow">
-      <textarea class="cin" id="cin" placeholder="Ask anything about your health..." rows="1" onkeydown="ckd(event)"></textarea>
+      <button class="cmic" id="micBtn" onclick="startVoice()" title="Voice input">&#127908;</button>
+      <button class="cphoto" onclick="pickPhotoForChat()" title="Send photo">&#128247;</button>
+      <textarea class="cin" id="cin" placeholder="Ask anything..." rows="1" onkeydown="ckd(event)"></textarea>
       <button class="csend" id="csend" onclick="sendC()">&#9650;</button>
     </div>
   </div>
@@ -448,17 +483,21 @@ function skipRunDay(){alog('run','skip',0,'Did not run - '+fs(Date.now()),fd(Dat
 function saveRunLog(wk,day,sk){
   var dist=parseFloat(document.getElementById('dist-'+sk).value)||0;
   var time=parseFloat(document.getElementById('time-'+sk).value)||0;
+  var paceEl=document.getElementById('pace-'+sk);
+  var pace=paceEl?paceEl.value.trim():'';
   if(dist===0&&time===0){notif('&#9888;','Enter distance or time');return;}
   if(!S.runLogs)S.runLogs={};
-  S.runLogs[sk]={dist:dist,time:time,ts:Date.now()};
+  S.runLogs[sk]={dist:dist,time:time,pace:pace,ts:Date.now()};
   var detail='Wk'+wk+' '+day+' - '+fs(Date.now());
   if(dist>0)detail+=', '+dist+'km';
   if(time>0)detail+=', '+time+'min';
+  if(pace)detail+=', pace '+pace+'/km';
   alog('run','complete',wk,detail,fd(Date.now()));
   save();
   var sl=document.getElementById('saved-'+sk);
-  sl.style.display='block';sl.textContent='Saved: '+(dist?dist+'km ':' ')+(time?time+'min':'');
-  notif('&#127939;',(dist?dist+'km ':'')+(time?'in '+time+'min':'')+'logged!');
+  sl.style.display='block';
+  sl.textContent='Saved: '+(dist?dist+'km ':' ')+(time?time+'min ':' ')+(pace?'@ '+pace+'/km':'');
+  notif('&#127939;',(dist?dist+'km ':'')+(time?'in '+time+'min ':'')+(pace?'@ '+pace+'/km':'')+'logged!');
 }
 
 function toggleRunDay(w,d){
@@ -504,7 +543,8 @@ function renderRun(){
       if(day.wo){
         var logDiv=document.createElement('div');logDiv.className='run-log';
         var savedTxt=saved?('Saved: '+(saved.dist?saved.dist+'km ':' ')+(saved.time?saved.time+'min':'')):'';
-        logDiv.innerHTML='<div class="run-log-f"><div class="run-log-lbl">&#128205; Distance (km)</div><input type="number" class="rli" id="dist-'+k+'" placeholder="e.g. 3.2" step="0.1" value="'+(saved?saved.dist:'')+'" min="0" max="50"></div><div class="run-log-f"><div class="run-log-lbl">&#9201; Time (min)</div><input type="number" class="rli" id="time-'+k+'" placeholder="e.g. 28" step="1" value="'+(saved?saved.time:'')+'" min="0" max="300"></div>';
+        var scanBtnHtml='<button class="scan-btn" onclick="scanGarmin(\''+k+'\')" >&#128247; Scan Garmin Watch</button>';
+        logDiv.innerHTML=scanBtnHtml+'<div style="display:flex;gap:8px;margin-top:8px;"><div class="run-log-f"><div class="run-log-lbl">&#128205; km</div><input type="number" class="rli" id="dist-'+k+'" placeholder="5.2" step="0.1" value="'+(saved?saved.dist:'')+'" min="0" max="50"></div><div class="run-log-f"><div class="run-log-lbl">&#9201; min</div><input type="number" class="rli" id="time-'+k+'" placeholder="28" step="1" value="'+(saved?saved.time:'')+'" min="0" max="300"></div><div class="run-log-f"><div class="run-log-lbl">&#128198; pace/km</div><input type="text" class="rli" id="pace-'+k+'" placeholder="5:30" value="'+(saved&&saved.pace?saved.pace:'')+'"></div></div>';
         var sb=document.createElement('button');sb.className='rlsave';sb.textContent=saved?'&#9989; Update Log':'&#128229; Save Distance & Time';
         var sl=document.createElement('div');sl.className='rlsaved';sl.id='saved-'+k;sl.textContent=savedTxt;if(saved)sl.style.display='block';
         (function(wn,dn,sk2){sb.onclick=function(){saveRunLog(wn,dn,sk2);};})(wk.w,day.d,k);
@@ -519,13 +559,24 @@ function renderRun(){
 
 function renderCharts(){
   var logs=[];
-  if(S.runLogs){Object.keys(S.runLogs).forEach(function(k){var l=S.runLogs[k];if(l.dist>0||l.time>0)logs.push({key:k,dist:l.dist||0,time:l.time||0,ts:l.ts});});}
+  if(S.runLogs){Object.keys(S.runLogs).forEach(function(k){var l=S.runLogs[k];if(l.dist>0||l.time>0)logs.push({key:k,dist:l.dist||0,time:l.time||0,pace:l.pace||'',ts:l.ts});});}
   logs.sort(function(a,b){return a.ts-b.ts;});
   var card=document.getElementById('run-charts-card');
   if(logs.length<2){card.style.display='none';return;}
   card.style.display='block';
   drawChart('dist-chart','dist-labels',logs,'dist','km','#00e5a0');
   drawChart('time-chart','time-labels',logs,'time','min','#0096ff');
+  // Pace chart - convert "5:30" to decimal minutes
+  var paceLogs=logs.filter(function(l){return l.pace&&l.pace.indexOf(':')>0;});
+  if(paceLogs.length>=2){
+    document.getElementById('pace-chart-lbl').style.display='block';
+    document.getElementById('pace-chart-wrap').style.display='block';
+    var paceDecimal=paceLogs.map(function(l){
+      var parts=l.pace.split(':');
+      return {key:l.key,paceNum:parseInt(parts[0])+(parseInt(parts[1])||0)/60,ts:l.ts};
+    });
+    drawChart('pace-chart','pace-labels',paceDecimal,'paceNum','min/km','#a855f7');
+  }
 }
 
 function drawChart(svgId,lblId,data,field,unit,color){
@@ -746,6 +797,155 @@ function addCmsg(text,cls){
   return el;
 }
 function scrollC(){var msgs=document.getElementById('cmsgs');msgs.scrollTop=msgs.scrollHeight;}
+
+// ══ GARMIN PHOTO SCAN ══
+async function scanGarmin(key){
+  var input=document.createElement('input');
+  input.type='file';input.accept='image/*';input.capture='environment';
+  input.onchange=async function(e){
+    var file=e.target.files[0];if(!file)return;
+    document.getElementById('scanOverlay').classList.add('on');
+    var reader=new FileReader();
+    reader.onload=async function(ev){
+      var b64=ev.target.result.split(',')[1];
+      var mt=file.type||'image/jpeg';
+      try{
+        var res=await fetch('https://api.anthropic.com/v1/messages',{
+          method:'POST',
+          headers:{'Content-Type':'application/json','x-api-key':AKEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+          body:JSON.stringify({
+            model:'claude-haiku-4-5-20251001',
+            max_tokens:200,
+            messages:[{role:'user',content:[
+              {type:'image',source:{type:'base64',media_type:mt,data:b64}},
+              {type:'text',text:'This is a photo of a Garmin GPS watch or fitness device showing workout stats. Extract these values: distance in km, total time in minutes as a number, and pace as min:sec per km string. Reply ONLY with valid JSON like this: {"distance":5.2,"time":28,"pace":"5:22"}. If a value is not visible set it to null. Do not include any other text.'}
+            ]}]
+          })
+        });
+        var data=await res.json();
+        document.getElementById('scanOverlay').classList.remove('on');
+        if(data.content&&data.content[0]&&data.content[0].text){
+          try{
+            var clean=data.content[0].text.replace(/```json|```/g,'').trim();
+            var parsed=JSON.parse(clean);
+            if(parsed.distance&&document.getElementById('dist-'+key))document.getElementById('dist-'+key).value=parsed.distance;
+            if(parsed.time&&document.getElementById('time-'+key))document.getElementById('time-'+key).value=Math.round(parsed.time);
+            if(parsed.pace&&document.getElementById('pace-'+key))document.getElementById('pace-'+key).value=parsed.pace;
+            notif('&#9989;','Garmin data read! Review and save.');
+          }catch(pe){notif('&#9888;','Could not parse data. Fill in manually.');}
+        }else{
+          notif('&#9888;','Could not read image. Fill in manually.');
+        }
+      }catch(fe){
+        document.getElementById('scanOverlay').classList.remove('on');
+        notif('&#9888;','Scan failed. Check connection.');
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+
+// ══ VOICE INPUT ══
+var voiceRecog=null;
+function startVoice(){
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){notif('&#9888;','Voice not supported on this browser');return;}
+  var btn=document.getElementById('micBtn');
+  if(voiceRecog){voiceRecog.stop();voiceRecog=null;btn.className='cmic';btn.innerHTML='&#127908;';return;}
+  voiceRecog=new SR();
+  voiceRecog.lang='en-US';voiceRecog.continuous=false;voiceRecog.interimResults=false;
+  btn.className='cmic recording';btn.innerHTML='&#9899;';
+  voiceRecog.onresult=function(e){
+    document.getElementById('cin').value=e.results[0][0].transcript;
+    btn.className='cmic';btn.innerHTML='&#127908;';voiceRecog=null;
+    notif('&#127908;','Voice captured! Tap send.');
+  };
+  voiceRecog.onerror=function(){btn.className='cmic';btn.innerHTML='&#127908;';voiceRecog=null;notif('&#9888;','Voice failed. Try again.');};
+  voiceRecog.onend=function(){btn.className='cmic';btn.innerHTML='&#127908;';voiceRecog=null;};
+  voiceRecog.start();
+}
+
+// ══ PHOTO IN CHAT ══
+function pickPhotoForChat(){
+  var input=document.createElement('input');
+  input.type='file';input.accept='image/*';
+  input.onchange=async function(e){
+    var file=e.target.files[0];if(!file)return;
+    var reader=new FileReader();
+    reader.onload=async function(ev){
+      var b64=ev.target.result.split(',')[1];
+      var mt=file.type||'image/jpeg';
+      var userPrompt=document.getElementById('cin').value.trim()||'Please analyze this image in the context of my health and fitness goals.';
+      document.getElementById('cin').value='';
+      addCmsg('&#128247; '+userPrompt,'user');
+      var msgContent=[
+        {type:'image',source:{type:'base64',media_type:mt,data:b64}},
+        {type:'text',text:userPrompt}
+      ];
+      cHist.push({role:'user',content:msgContent});
+      cLoad=true;document.getElementById('csend').disabled=true;
+      var typing=addCmsg('Analyzing photo...','ai typing');
+      try{
+        var res=await fetch('https://api.anthropic.com/v1/messages',{
+          method:'POST',
+          headers:{'Content-Type':'application/json','x-api-key':AKEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+          body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:300,system:bctx(),messages:cHist})
+        });
+        var data=await res.json();
+        var reply='Could not analyze the photo.';
+        if(data.content&&data.content[0]&&data.content[0].text)reply=data.content[0].text;
+        typing.textContent=reply;typing.className='cmsg ai';
+        cHist.push({role:'assistant',content:reply});
+      }catch(fe){typing.textContent='Error analyzing photo.';typing.className='cmsg ai';}
+      cLoad=false;document.getElementById('csend').disabled=false;scrollC();
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+
+// ══ PATTERN ANALYSIS ══
+async function analyzePatterns(){
+  var btn=document.getElementById('patternBtn');
+  var result=document.getElementById('patternResult');
+  btn.disabled=true;btn.textContent='Analyzing...';
+  result.style.display='block';result.textContent='Claude is analyzing your data patterns...';
+  var summary='Analyze these personal health patterns and give 4-5 specific insights with actionable recommendations. Be direct and personal.\n\n';
+  var fastDone=S.logs.filter(function(l){return l.type==='fast'&&l.status==='complete';});
+  var fastSkip=S.logs.filter(function(l){return l.type==='fast'&&l.status==='skip';});
+  summary+='FASTING: '+fastDone.length+' completed fasts, '+fastSkip.length+' skipped. ';
+  if(fastDone.length>0){var avgH=fastDone.reduce(function(a,b){return a+b.val;},0)/fastDone.length;summary+='Average duration: '+avgH.toFixed(1)+'h. Streak: '+S.streakDays+' days. ';}
+  var runArr=[];
+  if(S.runLogs){Object.keys(S.runLogs).forEach(function(k){var l=S.runLogs[k];if(l.dist>0)runArr.push(l);});}
+  runArr.sort(function(a,b){return a.ts-b.ts;});
+  if(runArr.length>0){
+    summary+='\nRUNNING: '+runArr.length+' runs logged. ';
+    summary+='Distance range: '+runArr[0].dist+'km to '+runArr[runArr.length-1].dist+'km. ';
+    var withPace=runArr.filter(function(l){return l.pace;});
+    if(withPace.length>1)summary+='Pace: first '+withPace[0].pace+'/km, latest '+withPace[withPace.length-1].pace+'/km. ';
+    var runSkip=S.logs.filter(function(l){return l.type==='run'&&l.status==='skip';});
+    summary+='Run skips: '+runSkip.length+'. ';
+  }
+  if(S.weights.length>1){
+    var wF=S.weights[0].val,wL=S.weights[S.weights.length-1].val;
+    summary+='\nWEIGHT: Started '+wF+'kg, now '+wL+'kg. Change: '+(wF-wL).toFixed(1)+'kg lost. ';
+    if(S.weightGoal)summary+='Goal: '+S.weightGoal+'kg ('+(wL-S.weightGoal).toFixed(1)+'kg to go). ';
+  }
+  summary+='\nCONTEXT: Week '+(cwd()+1)+' of 16 run plan. Lisfranc recovery. 19-hour fasting. ';
+  summary+='Give specific patterns you notice and concrete next steps. Under 200 words. Plain text.';
+  try{
+    var res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':AKEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:400,messages:[{role:'user',content:summary}]})
+    });
+    var data=await res.json();
+    if(data.content&&data.content[0]&&data.content[0].text){result.textContent=data.content[0].text;}
+    else{result.textContent='Not enough data yet for pattern analysis. Keep logging your runs, fasts, and weight!';}
+  }catch(fe){result.textContent='Could not analyze patterns. Check your internet connection.';}
+  btn.disabled=false;btn.textContent='&#129302; Analyze My Patterns';
+}
 
 function init(){renderWater();updateFS();updateDash();if(!S.isFasting||!S.fastStart){document.getElementById('recB').classList.add('on');idleUI();}else{document.getElementById('recB').classList.remove('on');startUI();}}
 init();
