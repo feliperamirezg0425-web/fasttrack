@@ -578,25 +578,69 @@ function renderWG(){
   document.getElementById('wlbl').innerHTML='<span>'+lb+'</span>';
 }
 
+function deleteLog(idx){
+  if(!confirm('Delete this entry?'))return;
+  S.logs.splice(idx,1);
+  save();renderHistory();renderCharts();
+  notif('&#128465;','Entry deleted.');
+}
+
+function deleteRunLog(key){
+  if(!confirm('Delete this run log?'))return;
+  if(S.runLogs&&S.runLogs[key]){
+    delete S.runLogs[key];
+    save();renderHistory();renderCharts();
+    notif('&#128465;','Run log deleted.');
+  }
+}
+
 function renderHistory(){
   var c=document.getElementById('hist-content');
   if(!S.logs||S.logs.length===0){c.innerHTML='<div class="empty">&#128196; No history yet.<br><br>Complete a fast, log a run, or weigh in to see your records here!</div>';return;}
+  // build reverse indexed list
+  var indexed=[];
+  S.logs.forEach(function(l,i){indexed.push({log:l,idx:i});});
+  indexed.reverse();
   var grouped={};
-  S.logs.slice().reverse().forEach(function(l){var g=l.dateLabel||fd(l.ts);if(!grouped[g])grouped[g]=[];grouped[g].push(l);});
+  indexed.forEach(function(item){
+    var g=item.log.dateLabel||fd(item.log.ts);
+    if(!grouped[g])grouped[g]=[];
+    grouped[g].push(item);
+  });
   var html='';
   Object.keys(grouped).forEach(function(dl){
     html+='<div class="hday"><div class="hdate">&#128197; '+dl+'</div>';
-    grouped[dl].forEach(function(l){
+    grouped[dl].forEach(function(item){
+      var l=item.log;var idx=item.idx;
       var icon='',color='',title='',sub='',badge='';
-      if(l.type==='fast'){icon='&#9203;';color=l.status==='complete'?'rgba(0,229,160,.12)':'rgba(255,107,53,.12)';title=l.status==='complete'?'Fast Completed':'Fast Skipped';sub=l.detail||'';badge=l.status==='complete'?'<span class="hbadge hc">'+l.val.toFixed(1)+'h</span>':'<span class="hbadge hs">Skipped</span>';}
-      else if(l.type==='run'){icon='&#127939;';color=l.status==='complete'?'rgba(0,150,255,.12)':'rgba(255,107,53,.12)';title=l.status==='complete'?'Run Completed':'Run Skipped';sub=l.detail||'';badge=l.status==='complete'?'<span class="hbadge" style="background:rgba(0,150,255,.1);color:#0096ff;">Done</span>':'<span class="hbadge hs">Skipped</span>';}
-      else if(l.type==='weight'){icon='&#9878;';color='rgba(245,158,11,.12)';title='Weekly Weigh-In';sub=l.detail||'';badge='<span class="hbadge" style="background:rgba(245,158,11,.1);color:#f59e0b;">'+l.val+'kg</span>';}
-      html+='<div class="hrow"><div class="hicon" style="background:'+color+';">'+icon+'</div><div style="flex:1;min-width:0;"><div class="htitle">'+title+'</div><div class="hsub" style="white-space:normal;">'+sub+'</div></div><div style="flex-shrink:0;margin-left:8px;">'+badge+'</div></div>';
+      if(l.type==='fast'){
+        icon='&#9203;';color=l.status==='complete'?'rgba(0,229,160,.12)':'rgba(255,107,53,.12)';
+        title=l.status==='complete'?'Fast Completed':'Fast Skipped';
+        sub=l.detail||'';
+        badge=l.status==='complete'?'<span class="hbadge hc">'+l.val.toFixed(1)+'h</span>':'<span class="hbadge hs">Skipped</span>';
+      }else if(l.type==='run'){
+        icon='&#127939;';color=l.status==='complete'?'rgba(0,150,255,.12)':'rgba(255,107,53,.12)';
+        title=l.status==='complete'?'Run Completed':'Run Skipped';
+        sub=l.detail||'';
+        badge=l.status==='complete'?'<span class="hbadge" style="background:rgba(0,150,255,.1);color:#0096ff;">Done</span>':'<span class="hbadge hs">Skipped</span>';
+      }else if(l.type==='weight'){
+        icon='&#9878;';color='rgba(245,158,11,.12)';
+        title='Weekly Weigh-In';sub=l.detail||'';
+        badge='<span class="hbadge" style="background:rgba(245,158,11,.1);color:#f59e0b;">'+l.val+'kg</span>';
+      }
+      var delBtn='<button onclick="deleteLog('+idx+')" style="background:none;border:1px solid rgba(255,107,53,.3);color:#ff6b35;border-radius:8px;padding:4px 8px;font-size:10px;cursor:pointer;margin-top:4px;width:100%;">&#128465; Delete</button>';
+      html+='<div class="hrow" style="flex-wrap:wrap;">'+
+        '<div class="hicon" style="background:'+color+';">'+icon+'</div>'+
+        '<div style="flex:1;min-width:0;"><div class="htitle">'+title+'</div><div class="hsub" style="white-space:normal;">'+sub+'</div>'+
+        (l.type==='run'?delBtn:'')+'</div>'+
+        '<div style="flex-shrink:0;margin-left:8px;">'+badge+'</div>'+
+        '</div>';
     });
     html+='</div>';
   });
   c.innerHTML=html;
 }
+
 
 function updateDash(){
   document.getElementById('d-str').textContent=S.streakDays;
