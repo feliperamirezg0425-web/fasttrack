@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FastTrack</title>
+<style>
+:root{--bg:#0a0e14;--s:#111720;--s2:#1a2333;--a:#00e5a0;--a2:#0096ff;--w:#ff6b35;--p:#a855f7;--y:#f59e0b;--t:#e8f0fe;--m:#5a7090;--b:#1e2d42;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{background:#0a0e14 !important;color:#e8f0fe !important;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;}
+.app{max-width:430px;margin:0 auto;background:#0a0e14;min-height:100vh;padding-bottom:80px;}
+.nav{display:flex;background:#111720;border-bottom:1px solid #1e2d42;position:sticky;top:0;z-index:50;}
+.nb{flex:1;padding:12px 2px 8px;background:none;border:none;color:#5a7090;font-size:9px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;border-bottom:2px solid transparent;}
+.nb.on{color:#00e5a0;border-bottom-color:#00e5a0;}
+.ni{font-size:16px;}
+.pg{display:none;padding:16px;}.pg.on{display:block;}
+.logo{font-size:22px;font-weight:800;letter-spacing:-1px;color:#e8f0fe;}.logo span{color:#00e5a0;}
+.ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.card{background:#111720;border:1px solid #1e2d42;border-radius:18px;padding:16px;margin-bottom:14px;}
+.ct{font-size:10px;letter-spacing:2px;color:#5a7090;text-transform:uppercase;margin-bottom:12px;}
+.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.dt{background:#111720;border:1px solid #1e2d42;border-radius:14px;padding:12px;cursor:pointer;}
+.dv{font-size:20px;font-weight:800;line-height:1;}.dl{font-size:9px;color:#5a7090;margin-top:3px;letter-spacing:1px;text-transform:uppercase;}.ds{font-size:10px;color:#5a7090;margin-top:2px;}
+.tc{background:#111720;border:1px solid #1e2d42;border-radius:22px;padding:24px 18px;text-align:center;margin-bottom:14px;position:relative;overflow:hidden;}
+.tc.on::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#00e5a0,transparent);}
+.pl{font-size:10px;letter-spacing:3px;color:#5a7090;text-transform:uppercase;margin-bottom:10px;}.pl.f{color:#00e5a0;}.pl.d{color:#0096ff;}
+.rw{position:relative;width:170px;height:170px;margin:0 auto 14px;}
+.rs{transform:rotate(-90deg);width:170px;height:170px;}
+.rb{fill:none;stroke:#1a2333;stroke-width:8;}
+.rp{fill:none;stroke:#00e5a0;stroke-width:8;stroke-linecap:round;stroke-dasharray:484;stroke-dashoffset:484;transition:stroke-dashoffset 1s ease,stroke .5s;}
+.rp.d{stroke:#0096ff;}
+.rc{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;}
+.td{font-size:30px;font-weight:700;letter-spacing:-1px;line-height:1;color:#e8f0fe;}
+.ts{font-size:10px;color:#5a7090;margin-top:3px;}
+.pt{font-size:12px;color:#5a7090;margin-bottom:14px;}.pt strong{color:#00e5a0;}
+.btn{background:#00e5a0;color:#0a0e14;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:800;cursor:pointer;width:100%;}
+.btn.stop{background:#ff6b35;color:#fff;}
+.btn.skip{background:#1a2333;border:1px solid #2a3a52;color:#5a7090;font-size:12px;font-weight:700;margin-top:8px;}
+.btn.out{background:rgba(0,150,255,.1);border:1px solid rgba(0,150,255,.3);color:#0096ff;font-size:13px;font-weight:700;}
+.btn.sm{padding:9px;font-size:12px;}
+.gls{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
+.gl{width:32px;height:40px;border:2px solid #1e2d42;border-radius:3px 3px 7px 7px;background:#1a2333;position:relative;cursor:pointer;overflow:hidden;}
+.gl::after{content:'';position:absolute;bottom:0;left:0;right:0;height:0;background:linear-gradient(180deg,rgba(0,150,255,.5),#0096ff);transition:height .4s;border-radius:0 0 5px 5px;}
+.gl.on{border-color:#0096ff;}.gl.on::after{height:100%;}
+.rec{background:rgba(255,107,53,.1);border:1px solid rgba(255,107,53,.3);border-radius:12px;padding:12px;margin-bottom:12px;display:none;}
+.rec.on{display:block;}
+.rbtn{background:#ff6b35;color:#fff;border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:800;cursor:pointer;width:100%;margin-top:8px;}
+.wk{background:#1a2333;border:1px solid #1e2d42;border-radius:14px;margin-bottom:10px;overflow:hidden;}
+.wkh{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;cursor:pointer;gap:8px;}
+.wkinfo{flex:1;min-width:0;}.wkn{font-size:10px;color:#5a7090;letter-spacing:1px;text-transform:uppercase;}
+.wkph{font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap;flex-shrink:0;}
+.pw{background:rgba(0,229,160,.15);color:#00e5a0;}.pwj{background:rgba(0,150,255,.15);color:#0096ff;}.pj{background:rgba(168,85,247,.15);color:#a855f7;}.pr{background:rgba(245,158,11,.15);color:#f59e0b;}
+.wkt{font-size:14px;font-weight:700;color:#e8f0fe;margin-top:2px;}
+.wkb{padding:0 14px 14px;}
+.dayrow{padding:10px 0;border-top:1px solid #1e2d42;}
+.dayrow-top{display:flex;align-items:flex-start;gap:10px;}
+.dayn{width:36px;font-size:10px;font-weight:800;color:#5a7090;text-transform:uppercase;padding-top:2px;flex-shrink:0;}
+.dayt{font-size:13px;font-weight:700;color:#e8f0fe;line-height:1.2;}
+.dayd{font-size:11px;color:#5a7090;margin-top:2px;line-height:1.4;}
+.day-done{background:rgba(0,229,160,.1);border:1px solid #00e5a0;border-radius:8px;padding:4px 8px;font-size:10px;color:#00e5a0;font-weight:700;cursor:pointer;white-space:nowrap;}
+.day-todo{background:rgba(0,150,255,.1);border:1px solid rgba(0,150,255,.3);border-radius:8px;padding:4px 8px;font-size:10px;color:#0096ff;font-weight:700;cursor:pointer;white-space:nowrap;}
+.day-rest{background:#1e2d42;border-radius:8px;padding:4px 8px;font-size:10px;color:#5a7090;white-space:nowrap;}
+.run-log{display:flex;gap:8px;margin-top:8px;padding:10px;background:#0a0e14;border-radius:10px;flex-wrap:wrap;}
+.run-log-f{flex:1;min-width:80px;}
+.run-log-lbl{font-size:9px;color:#5a7090;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+.rli{background:#1a2333;border:1px solid #1e2d42;border-radius:8px;padding:7px 10px;color:#e8f0fe;font-size:14px;font-weight:700;width:100%;outline:none;}
+.rli:focus{border-color:#00e5a0;}
+.rlsave{background:rgba(0,229,160,.1);border:1px solid rgba(0,229,160,.3);color:#00e5a0;border-radius:8px;padding:7px 12px;font-size:11px;font-weight:700;cursor:pointer;width:100%;margin-top:8px;}
+.rlsaved{font-size:10px;color:#00e5a0;margin-top:4px;display:none;}
+.chart-w{width:100%;height:130px;position:relative;margin:10px 0;}
+.chart-s{width:100%;height:100%;}
+.chart-l{display:flex;justify-content:space-between;font-size:9px;color:#5a7090;margin-top:2px;flex-wrap:wrap;gap:2px;}
+.gw{width:100%;height:110px;position:relative;margin:10px 0;}
+.ni2{background:#1a2333;border:1px solid #1e2d42;border-radius:10px;padding:9px 12px;color:#e8f0fe;font-size:16px;font-weight:700;width:100%;outline:none;}
+.gwl{display:flex;justify-content:space-between;font-size:9px;color:#5a7090;margin-top:3px;}
+.hday{margin-bottom:16px;}
+.hdate{font-size:11px;color:#5a7090;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #1e2d42;}
+.hrow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(30,45,66,.5);}
+.hrow:last-child{border-bottom:none;}
+.hicon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.htitle{font-size:13px;font-weight:700;color:#e8f0fe;}.hsub{font-size:11px;color:#5a7090;margin-top:1px;}
+.hbadge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap;}
+.hc{background:rgba(0,229,160,.1);color:#00e5a0;}.hs{background:rgba(255,107,53,.1);color:#ff6b35;}
+.ta{background:#1a2333;border:1px solid #1e2d42;border-radius:10px;padding:10px;color:#5a7090;font-size:10px;font-family:monospace;width:100%;height:80px;outline:none;resize:none;}
+.rpbar{background:#1a2333;border-radius:100px;height:6px;overflow:hidden;margin-bottom:4px;}
+.rpfill{background:linear-gradient(90deg,#00e5a0,#0096ff,#a855f7,#f59e0b);height:100%;border-radius:100px;transition:width .5s;}
+.empty{text-align:center;padding:40px 20px;color:#5a7090;font-size:13px;line-height:1.6;}
+.sitem{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #1e2d42;}
+.sitem:last-child{border-bottom:none;padding-bottom:0;}.sitem:first-child{padding-top:0;}
+.sdot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.notif{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);background:#1a2333;border:1px solid #1e2d42;border-radius:14px;padding:12px 18px;font-size:13px;color:#e8f0fe;display:flex;align-items:center;gap:10px;transition:transform .4s cubic-bezier(.34,1.56,.64,1);z-index:200;white-space:nowrap;max-width:92vw;box-shadow:0 8px 32px rgba(0,0,0,.6);}
+.notif.on{transform:translateX(-50%) translateY(0);}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}.pulsing{animation:pulse 1.5s infinite;}
+.streak{background:#1a2333;border:1px solid #1e2d42;border-radius:20px;padding:5px 12px;font-size:11px;color:#00e5a0;}
+/* ASK CLAUDE */
+.cfab{position:fixed;bottom:88px;right:16px;width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,#a855f7,#6366f1);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:24px;z-index:150;box-shadow:0 4px 24px rgba(168,85,247,.5);transition:transform .2s;}
+.cfab:active{transform:scale(.9);}
+.coverlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:300;display:none;align-items:flex-end;backdrop-filter:blur(6px);}
+.coverlay.on{display:flex;}
+.cmodal{background:#111720;border:1px solid #1e2d42;border-radius:24px 24px 0 0;width:100%;max-width:430px;margin:0 auto;max-height:88vh;display:flex;flex-direction:column;}
+.chead{display:flex;align-items:center;gap:12px;padding:16px 18px 12px;border-bottom:1px solid #1e2d42;flex-shrink:0;}
+.cavatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#a855f7,#6366f1);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.ctitle{font-size:15px;font-weight:800;color:#e8f0fe;}.csub{font-size:11px;color:#5a7090;}
+.cclose{margin-left:auto;background:none;border:none;color:#5a7090;font-size:22px;cursor:pointer;padding:4px;}
+.cmsgs{flex:1;overflow-y:auto;padding:16px 18px;display:flex;flex-direction:column;gap:12px;min-height:180px;}
+.cmsg{max-width:88%;padding:10px 14px;border-radius:16px;font-size:13px;line-height:1.55;}
+.cmsg.user{align-self:flex-end;background:rgba(0,150,255,.15);border:1px solid rgba(0,150,255,.3);color:#e8f0fe;border-radius:16px 16px 4px 16px;}
+.cmsg.ai{align-self:flex-start;background:#1a2333;border:1px solid #1e2d42;color:#e8f0fe;border-radius:16px 16px 16px 4px;}
+.cmsg.typing{color:#5a7090;font-style:italic;}
+.cquick{display:flex;gap:8px;padding:8px 18px;overflow-x:auto;flex-shrink:0;scrollbar-width:none;}
+.cquick::-webkit-scrollbar{display:none;}
+.cqb{background:#1a2333;border:1px solid #1e2d42;color:#5a7090;border-radius:20px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.cqb:active{border-color:#a855f7;color:#a855f7;}
+.cinrow{display:flex;gap:8px;padding:12px 18px 20px;border-top:1px solid #1e2d42;flex-shrink:0;}
+.cin{flex:1;background:#1a2333;border:1px solid #1e2d42;border-radius:12px;padding:10px 14px;color:#e8f0fe;font-size:13px;outline:none;resize:none;font-family:inherit;max-height:80px;min-height:40px;}
+.cin:focus{border-color:#a855f7;}
+.csend{background:linear-gradient(135deg,#a855f7,#6366f1);border:none;border-radius:12px;padding:10px 16px;color:#fff;font-size:16px;cursor:pointer;flex-shrink:0;}
+.csend:disabled{opacity:.4;}
+/* GARMIN SCAN */
+.scan-btn{background:rgba(0,229,160,.1);border:1px solid rgba(0,229,160,.3);color:#00e5a0;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;margin-top:6px;width:100%;}
+.scan-btn:active{background:rgba(0,229,160,.25);}
+.scanning-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;}
+.scanning-overlay.on{display:flex;}
+.scan-spinner{width:50px;height:50px;border:4px solid #1e2d42;border-top-color:#00e5a0;border-radius:50%;animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.scan-txt{color:#e8f0fe;font-size:14px;font-weight:700;}
+/* VOICE & PHOTO BUTTONS */
+.cmic{background:#1a2333;border:1px solid #1e2d42;border-radius:12px;padding:10px 12px;color:#5a7090;font-size:16px;cursor:pointer;flex-shrink:0;transition:all .2s;}
+.cmic.recording{background:rgba(255,107,53,.2);border-color:#ff6b35;color:#ff6b35;}
+.cphoto{background:#1a2333;border:1px solid #1e2d42;border-radius:12px;padding:10px 12px;color:#5a7090;font-size:16px;cursor:pointer;flex-shrink:0;}
+.cphoto:active{border-color:#a855f7;color:#a855f7;}
+/* PATTERN ANALYSIS */
+.pattern-card{background:#111720;border:1px solid rgba(168,85,247,.25);border-radius:18px;padding:16px;margin-bottom:14px;}
+.pattern-result{font-size:13px;color:#e8f0fe;line-height:1.6;margin-top:12px;padding:12px;background:#1a2333;border-radius:10px;min-height:60px;}
+.pattern-btn{background:linear-gradient(135deg,#a855f7,#6366f1);border:none;border-radius:12px;padding:12px;font-size:13px;font-weight:800;color:#fff;cursor:pointer;width:100%;}
+.pattern-btn:disabled{opacity:.5;}
+
+</style>
+</head>
+<body>
+<div class="app">
+<div class="scanning-overlay" id="scanOverlay">
+  <div class="scan-spinner"></div>
+  <div class="scan-txt">Reading Garmin data...</div>
+  <div style="font-size:11px;color:#5a7090;">AI is analyzing your watch</div>
+</div>
+<div class="nav">
+  <button class="nb on" onclick="sp('dash')"><span class="ni">&#9632;</span>Dashboard</button>
+  <button class="nb" onclick="sp('fast')"><span class="ni">&#9203;</span>Fast</button>
+  <button class="nb" onclick="sp('run')"><span class="ni">&#127939;</span>Run</button>
+  <button class="nb" onclick="sp('body')"><span class="ni">&#9878;</span>Body</button>
+  <button class="nb" onclick="sp('hist')"><span class="ni">&#128196;</span>History</button>
+</div>
+
+<!-- DASHBOARD -->
+<div class="pg on" id="pg-dash">
+  <div class="ph" style="margin-top:4px;"><div class="logo">Fast<span>Track</span></div><div class="streak">&#128293; <span id="d-str">0</span>d streak</div></div>
+  <div class="dgrid">
+    <div class="dt" onclick="sp('fast')"><div style="font-size:18px;margin-bottom:4px;">&#9203;</div><div class="dv" style="color:#00e5a0;" id="d-ft">--:--</div><div class="dl">Fasting</div><div class="ds" id="d-fs">Tap to start</div></div>
+    <div class="dt" onclick="sp('fast')"><div style="font-size:18px;margin-bottom:4px;">&#128167;</div><div class="dv" style="color:#0096ff;" id="d-wa">0/10</div><div class="dl">Water</div><div class="ds" id="d-ws">0ml today</div></div>
+    <div class="dt" onclick="sp('body')"><div style="font-size:18px;margin-bottom:4px;">&#9878;</div><div class="dv" style="color:#f59e0b;" id="d-wt">--</div><div class="dl">Weight</div><div class="ds" id="d-wts">Log Sundays</div></div>
+    <div class="dt" onclick="sp('run')"><div style="font-size:18px;margin-bottom:4px;">&#127939;</div><div class="dv" style="color:#a855f7;font-size:14px;" id="d-rw">Wk 1</div><div class="dl">Run Plan</div><div class="ds" id="d-rs">0%</div></div>
+  </div>
+  <div class="card" onclick="sp('run')" style="cursor:pointer;"><div class="ct">&#127939; Today's Workout</div><div style="font-size:14px;font-weight:700;color:#e8f0fe;" id="d-rt">Loading...</div><div style="font-size:12px;color:#5a7090;margin-top:4px;" id="d-rd"></div></div>
+  <div class="card"><div class="ct">&#128197; Daily Schedule</div>
+    <div class="sitem"><div class="sdot" style="background:#00e5a0;"></div><div style="flex:1;font-size:13px;font-weight:600;color:#e8f0fe;">&#127859; Breakfast</div><div style="font-size:12px;color:#00e5a0;font-weight:700;">8:00 AM</div></div>
+    <div class="sitem"><div class="sdot" style="background:#0096ff;"></div><div style="flex:1;font-size:13px;font-weight:600;color:#e8f0fe;">&#129367; Lunch</div><div style="font-size:12px;color:#0096ff;font-weight:700;">1:00 PM</div></div>
+    <div class="sitem"><div class="sdot" style="background:#ff6b35;"></div><div style="flex:1;font-size:13px;font-weight:600;color:#e8f0fe;">&#9203; Fast Begins</div><div style="font-size:12px;color:#ff6b35;font-weight:700;">1:00 PM</div></div>
+    <div class="sitem"><div class="sdot" style="background:#f59e0b;"></div><div style="flex:1;font-size:13px;font-weight:600;color:#e8f0fe;">&#9878; Weigh-In</div><div style="font-size:12px;color:#f59e0b;font-weight:700;">Sundays AM</div></div>
+  </div>
+</div>
+
+<!-- FAST -->
+<div class="pg" id="pg-fast">
+  <div class="rec" id="recB" style="display:none;"></div>
+  <div class="tc" id="tcard">
+    <div class="pl" id="plbl">READY TO START</div>
+    <div class="rw"><svg class="rs" viewBox="0 0 170 170"><circle class="rb" cx="85" cy="85" r="77"/><circle class="rp" id="rprog" cx="85" cy="85" r="77"/></svg><div class="rc"><div class="td" id="tdisp">00:00:00</div><div class="ts" id="tsub">tap to start</div></div></div>
+    <div class="pt" id="ptxt">Start your <strong>19-hour fast</strong> now</div>
+    <button class="btn" id="mbtn" onclick="handleBtn()">Start Fast</button>
+    <button class="btn skip" id="skipFBtn" onclick="skipFast()" style="display:none;">&#10006; Did Not Fast Today</button>
+  </div>
+  <!-- MANUAL TIME ENTRY -->
+  <div class="card" id="manualTimeCard" style="margin-bottom:14px;">
+    <div class="ct">&#9200; Manual Fast Entry</div>
+    <div style="font-size:12px;color:#5a7090;margin-bottom:12px;line-height:1.5;">Set a custom start time if you forgot to tap Start Fast, or log a past fast.</div>
+    <div style="display:flex;gap:10px;margin-bottom:10px;">
+      <div style="flex:1;">
+        <div style="font-size:9px;color:#5a7090;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">Start Time</div>
+        <input type="datetime-local" id="manualStart" style="background:#1a2333;border:1px solid #1e2d42;border-radius:10px;padding:9px 12px;color:#e8f0fe;font-size:13px;width:100%;outline:none;-webkit-appearance:none;">
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn out sm" style="flex:1;" onclick="setManualStart()">&#9654; Start Fast at This Time</button>
+    </div>
+    <div style="margin-top:8px;display:flex;gap:10px;">
+      <div style="flex:1;">
+        <div style="font-size:9px;color:#5a7090;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">End Time (log past fast)</div>
+        <input type="datetime-local" id="manualEnd" style="background:#1a2333;border:1px solid #1e2d42;border-radius:10px;padding:9px 12px;color:#e8f0fe;font-size:13px;width:100%;outline:none;-webkit-appearance:none;">
+      </div>
+    </div>
+    <button class="btn skip sm" style="margin-top:8px;" onclick="logPastFast()">&#128196; Log Past Fast (Start + End Time)</button>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+    <div class="card" style="margin-bottom:0;text-align:center;"><div style="font-size:24px;font-weight:800;color:#00e5a0;" id="f-tot">0</div><div style="font-size:9px;color:#5a7090;letter-spacing:1px;text-transform:uppercase;margin-top:4px;">Fasts Done</div></div>
+    <div class="card" style="margin-bottom:0;text-align:center;"><div style="font-size:24px;font-weight:800;color:#0096ff;" id="f-avg">0h</div><div style="font-size:9px;color:#5a7090;letter-spacing:1px;text-transform:uppercase;margin-top:4px;">Avg Duration</div></div>
+  </div>
+  <div class="card"><div class="ct">&#128167; Water <span style="margin-left:auto;color:#0096ff;" id="wcnt">0/2500ml</span></div><div class="gls" id="glasses"></div><div style="font-size:10px;color:#5a7090;text-align:center;margin-bottom:10px;" id="wsub">0 of 10 glasses</div><button class="btn out sm" onclick="addWater()">+ Add Glass of Water</button></div>
+</div>
+
+<!-- RUN -->
+<div class="pg" id="pg-run">
+  <div class="ph" style="margin-top:4px;"><div style="font-size:18px;font-weight:800;color:#e8f0fe;">Run Plan — 0 to 21km</div></div>
+  <div class="card">
+    <div class="ct">&#127942; Progress — 16 Weeks</div>
+    <div class="rpbar"><div class="rpfill" id="r-fill" style="width:0%"></div></div>
+    <div style="display:flex;justify-content:space-between;font-size:10px;color:#5a7090;margin-bottom:10px;"><span id="r-dc">0 of 16 weeks</span><span id="r-pct">0%</span></div>
+    <div style="display:flex;gap:8px;font-size:10px;margin-bottom:10px;flex-wrap:wrap;"><span style="color:#00e5a0;">&#9632; Walk (2w)</span><span style="color:#0096ff;">&#9632; Walk-Jog (3w)</span><span style="color:#a855f7;">&#9632; Jog (3w)</span><span style="color:#f59e0b;">&#9632; Run 21k (8w)</span></div>
+    <div style="font-size:11px;color:#ff6b35;background:rgba(255,107,53,.08);border:1px solid rgba(255,107,53,.2);border-radius:8px;padding:8px 10px;line-height:1.5;margin-bottom:10px;">&#9888; <strong>Lisfranc Recovery.</strong> External rehab ongoing. Stop if you feel midfoot pain.</div>
+    <button class="btn skip sm" onclick="skipRunDay()">&#10006; Did Not Run Today</button>
+  </div>
+  <div id="run-weeks"></div>
+</div>
+
+<!-- BODY -->
+<div class="pg" id="pg-body">
+  <div class="ph" style="margin-top:4px;"><div style="font-size:18px;font-weight:800;color:#e8f0fe;">Body Tracking</div></div>
+  <div class="card">
+    <div class="ct">&#9878; Weight — Every Sunday Morning</div>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;"><div><span style="font-size:34px;font-weight:800;color:#f59e0b;" id="w-cur">--</span><span style="font-size:13px;color:#5a7090;margin-left:4px;">kg</span></div><div style="text-align:right;"><div style="font-size:10px;color:#5a7090;">Goal</div><div style="font-size:15px;font-weight:700;color:#00e5a0;" id="w-goal">-- kg</div></div></div>
+    <div id="w-diff" style="font-size:12px;margin-bottom:10px;"></div>
+    <div style="font-size:11px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:8px 10px;color:#f59e0b;margin-bottom:10px;">&#128197; Every <strong>Sunday morning</strong> — same time, before eating.</div>
+    <div class="gw" id="wgw"><svg id="wsvg" style="width:100%;height:100%;"></svg></div>
+    <div class="gwl" id="wlbl"></div>
+    <div style="display:flex;gap:8px;margin-top:10px;"><input type="number" class="ni2" id="win" placeholder="Weight in kg" step="0.1"><button class="btn sm" style="width:auto;padding:9px 16px;white-space:nowrap;" onclick="logWeight()">Log</button></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid #1e2d42;"><span style="font-size:12px;color:#5a7090;">&#127919; Goal (kg)</span><div style="display:flex;align-items:center;gap:8px;"><input type="number" class="ni2" id="wgi" placeholder="e.g. 75" step="0.1" style="width:90px;padding:8px 10px;font-size:14px;"><button class="btn sm" style="width:auto;padding:8px 14px;" onclick="setGoal()">Set</button></div></div>
+  </div>
+  <div class="card">
+    <div class="ct">&#128190; Data Backup — Includes All Run Logs</div>
+    <div style="font-size:12px;color:#5a7090;margin-bottom:10px;line-height:1.5;">All data including distances, times, fasts, and weight are in the backup. Export weekly to stay safe.</div>
+    <div style="display:flex;gap:8px;"><button class="btn out sm" style="flex:1;" onclick="exportData()">&#8659; Export All Data</button><button class="btn sm" style="flex:1;background:#1a2333;border:1px solid #1e2d42;color:#5a7090;" onclick="showImport()">&#8657; Import Data</button></div>
+    <div id="import-area" style="display:none;margin-top:10px;"><textarea class="ta" id="import-txt" placeholder="Paste your exported data here..."></textarea><button class="btn sm" style="margin-top:8px;" onclick="importData()">Restore Everything</button></div>
+    <textarea class="ta" id="export-txt" style="display:none;margin-top:10px;"></textarea>
+  </div>
+  <button style="background:none;border:1px solid #1e2d42;color:#5a7090;border-radius:10px;padding:9px 18px;font-size:11px;cursor:pointer;display:block;margin:0 auto;" onclick="resetAll()">&#8635; Reset All Data</button>
+</div>
+
+<!-- HISTORY -->
+<div class="pg" id="pg-hist">
+  <div class="ph" style="margin-top:4px;"><div style="font-size:18px;font-weight:800;color:#e8f0fe;">History</div><button style="background:#1a2333;border:1px solid #1e2d42;border-radius:10px;padding:5px 12px;color:#5a7090;font-size:11px;cursor:pointer;" onclick="renderHistory()">Refresh</button></div>
+  <div class="pattern-card">
+    <div class="ct">&#129302; AI Pattern Analysis</div>
+    <div style="font-size:12px;color:#5a7090;margin-bottom:10px;line-height:1.5;">Claude analyzes your fasting, running, and weight data to find patterns and give you personalized recommendations.</div>
+    <button class="pattern-btn" id="patternBtn" onclick="analyzePatterns()">&#129302; Analyze My Patterns</button>
+    <div class="pattern-result" id="patternResult" style="display:none;"></div>
+  </div>
+  <div class="card" id="run-charts-card" style="display:none;">
+    <div class="ct">&#127939; Run Charts</div>
+    <div style="font-size:11px;color:#5a7090;margin-bottom:6px;">Distance per run (km)</div>
+    <div class="chart-w"><svg id="dist-chart" class="chart-s"></svg></div>
+    <div class="chart-l" id="dist-labels"></div>
+    <div style="font-size:11px;color:#5a7090;margin:12px 0 6px;">Time per run (minutes)</div>
+    <div class="chart-w"><svg id="time-chart" class="chart-s"></svg></div>
+    <div class="chart-l" id="time-labels"></div>
+    <div style="font-size:11px;color:#5a7090;margin:12px 0 6px;" id="pace-chart-lbl" style="display:none;">Pace per run (min/km)</div>
+    <div class="chart-w" id="pace-chart-wrap" style="display:none;"><svg id="pace-chart" class="chart-s"></svg></div>
+    <div class="chart-l" id="pace-labels"></div>
+  </div>
+  <div id="hist-content"></div>
+</div>
+</div>
+
+<!-- ASK CLAUDE FAB -->
+<button class="cfab" onclick="openC()" title="Ask Claude">&#129302;</button>
+
+<!-- ASK CLAUDE MODAL -->
+<div class="coverlay" id="coverlay" onclick="overlayC(event)">
+  <div class="cmodal">
+    <div class="chead">
+      <div class="cavatar">&#129302;</div>
+      <div><div class="ctitle">Ask Claude</div><div class="csub">Your health &amp; fitness AI assistant</div></div>
+      <button class="cclose" onclick="closeC()">&#10005;</button>
+    </div>
+    <div class="cquick">
+      <button class="cqb" onclick="qa('What should I eat to break my fast?')">Break fast meal?</button>
+      <button class="cqb" onclick="qa('Is it normal to feel dizzy fasting?')">Dizzy fasting?</button>
+      <button class="cqb" onclick="qa('My foot feels sore after running. Should I rest?')">Foot soreness?</button>
+      <button class="cqb" onclick="qa('How much water should I drink while fasting?')">Water &amp; fasting?</button>
+      <button class="cqb" onclick="qa('What foods help with weight loss while fasting?')">Weight loss foods?</button>
+      <button class="cqb" onclick="qa('How do I know if I am running too fast for my recovery?')">Running pace?</button>
+      <button class="cqb" onclick="qa('What stretches are good for Lisfranc recovery?')">Stretches?</button>
+    </div>
+    <div class="cmsgs" id="cmsgs">
+      <div class="cmsg ai">Hi! I am your FastTrack health assistant. I know your fasting stats, Lisfranc recovery status, weight, and run plan. Ask me anything! &#128170;</div>
+    </div>
+    <div class="cinrow">
+      <button class="cmic" id="micBtn" onclick="startVoice()" title="Voice input">&#127908;</button>
+      <button class="cphoto" onclick="pickPhotoForChat()" title="Send photo">&#128247;</button>
+      <textarea class="cin" id="cin" placeholder="Ask anything..." rows="1" onkeydown="ckd(event)"></textarea>
+      <button class="csend" id="csend" onclick="sendC()">&#9650;</button>
+    </div>
+  </div>
+</div>
+
+<div class="notif" id="notif"><span id="ni">&#128167;</span><span id="nt">ok</span></div>
+
+<script>
+var FH=19,FM=FH*3600000,WG=10,CIRC=2*Math.PI*77,K='happ_v6';
+// RS removed
+var MO=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function fd(ts){var d=new Date(ts);return MO[d.getMonth()]+' '+d.getDate()+', '+d.getFullYear();}
+function fs(ts){var d=new Date(ts);return MO[d.getMonth()]+' '+d.getDate();}
+
+var RP=[
+{w:1,ph:'walk',title:'Strength Walks',days:[
+{d:'D1',wo:true,t:'30 Min Brisk Walk',ds:'Heel-to-toe gait focus. Full push-off from foot. Rehab continues externally.'},
+{d:'D2',wo:false,t:'Rest + Rehab',ds:'Your PT session. Ice if swollen. Toe raises x20, foot circles x10.'},
+{d:'D3',wo:true,t:'35 Min Walk Varied Terrain',ds:'Grass or slight incline. Build confidence in the foot.'},
+{d:'D4',wo:false,t:'Rest',ds:'Rest. Ice foot 10 min if sore. Gentle calf stretches.'},
+{d:'D5',wo:true,t:'40 Min Walk Push the Pace',ds:'Brisk effort. Strong heel-to-toe. Focus on feeling athletic again.'},
+{d:'D6',wo:false,t:'Active Rest',ds:'Easy 15 min stroll. Stretch calves and feet.'},
+{d:'D7',wo:false,t:'REST + Weigh-In',ds:'Full rest. First weigh-in of the plan. Log your starting weight!'}]},
+{w:2,ph:'walk',title:'Power Walks + Jog Tests',days:[
+{d:'D1',wo:true,t:'40 Min Brisk Walk',ds:'Strong confident pace. Add 3x20 sec gentle jog at end to test foot.'},
+{d:'D2',wo:false,t:'Rest + Rehab',ds:'Rest. Assess foot after jogging. Tell your PT how it felt.'},
+{d:'D3',wo:true,t:'40 Min Walk + Jog Test',ds:'35 min walk then 3x30 sec very light jog. Monitor midfoot closely.'},
+{d:'D4',wo:false,t:'Rest',ds:'Rest. If foot felt fine, you are cleared for walk-jog next week!'},
+{d:'D5',wo:true,t:'45 Min Power Walk',ds:'Best effort walk. Short fast-walk bursts. Feeling strong is the goal.'},
+{d:'D6',wo:false,t:'Active Rest',ds:'Easy walk and foam roll calves.'},
+{d:'D7',wo:false,t:'REST + Weigh-In',ds:'Rest. Weigh-in. Log it!'}]},
+{w:3,ph:'walkjog',title:'Walk-Jog Intervals Begin',days:[
+{d:'D1',wo:true,t:'Walk 4 / Jog 1 x4',ds:'Walk 4 min, jog 1 min, repeat 4x. Jog must feel easy. Land softly.'},
+{d:'D2',wo:false,t:'Rest',ds:'Rest. Note how foot feels the day AFTER first jogging.'},
+{d:'D3',wo:true,t:'Walk 3 / Jog 2 x4',ds:'More jogging. Total 8 min jogging. Still very easy pace.'},
+{d:'D4',wo:false,t:'Rest',ds:'Rest day.'},
+{d:'D5',wo:true,t:'Walk 3 / Jog 2 x5',ds:'10 total minutes of jogging. Conversational pace throughout.'},
+{d:'D6',wo:false,t:'Active Rest',ds:'Easy walk and stretch.'},
+{d:'D7',wo:false,t:'REST + Weigh-In',ds:'Rest. Weigh-in!'}]},
+{w:4,ph:'walkjog',title:'Mostly Jogging Now',days:[
+{d:'D1',wo:true,t:'Walk 2 / Jog 3 x5',ds:'15 total minutes of jogging. More jog than walk!'},
+{d:'D2',wo:false,t:'Rest',ds:'Rest.'},
+{d:'D3',wo:true,t:'Walk 2 / Jog 4 x4',ds:'16 min jogging. Walk is just recovery now.'},
+{d:'D4',wo:false,t:'Rest',ds:'Rest.'},
+{d:'D5',wo:true,t:'Walk 1 / Jog 5 x4',ds:'20 min jogging! Almost continuous. You are becoming a runner again.'},
+{d:'D6',wo:false,t:'Active Rest',ds:'Easy walk and stretch.'},
+{d:'D7',wo:false,t:'REST + Weigh-In',ds:'Rest. Weigh-in. 4 weeks!'}]},
+{w:5,ph:'walkjog',title:'First Continuous Jog',days:[
+{d:'D1',wo:true,t:'20 Min Continuous Jog',ds:'First continuous jog! Take 1-2 walk breaks if needed. Land soft, breathe easy.'},
+{d:'D2',wo:false,t:'Rest',ds:'Rest. You jogged continuously after Lisfranc! Celebrate.'},
+{d:'D3',wo:true,t:'22 Min Continuous Jog',ds:'Two extra minutes. Keep very easy. Hold a conversation throughout.'},
+{d:'D4',wo:false,t:'Rest',ds:'Rest.'},
+{d:'D5',wo:true,t:'25 Min Continuous Jog',ds:'Building duration. Consistent easy effort. This is your foundation.'},
+{d:'D6',wo:false,t:'Active Rest',ds:'Easy walk and stretch.'},
+{d:'D7',wo:false,t:'REST + Weigh-In',ds:'Rest. Weigh-in!'}]},
+{w:6,ph:'jog',title:'Jog Build — First 3km',days:[
+{d:'D1',wo:true,t:'25 Min Easy Jog',ds:'Consistent easy effort. Controlled breathing throughout.'},
+{d:'D2',wo:false,t:'Rest',ds:'Rest.'},
+{d:'D3',wo:true,t:'3km Easy Run',ds:'First distance target! Do not race it. Enjoy every step.'},
+{d:'D4',wo:false,t:'Rest',ds:'Rest. You ran 3km after Lisfranc. Huge.'},
+{d:'D5',wo:true,t:'25 Min Easy + Strides',ds:'Easy jog then 3x50m relaxed accelerations.'},
+{d:'D6',wo:false,t:'Active Rest',ds:'Easy walk and stretch.'},
+{d:'D7',wo:false,t:'REST + Weigh-In',ds:'Rest. Weigh-in!'}]},
+{w:7,ph:'jog',title:'Building to 4km',days:[
+{d:'D1',wo:true,t:'3km Easy',ds:'Comfortable run. How does it feel vs last week?'},
+{d:'D2',wo:false,t:'Rest',ds:'Rest.'},
+{d:'D3',wo:true,t:'3.5km + Strides',ds:'3.5km easy then 4x100m relaxed strides.'},
+{d:'D4',wo:false,t:'Rest',ds:'Rest.'},
+{d:'D5',wo:true,t:'4km Easy Run',ds:'New distance record! Easy pace.'},
+{d:'D6',wo:false,t:'Active Rest',ds:'Walk and stretch.'},
+{d:'D7',wo:false,t:'REST + Weigh-In',ds:'Rest. Weigh-in. 7 weeks strong!'}]},
+{w:8,ph:'jog',title:'First 5km!',days:[
+{d:'D1',wo:true,t:'4km Easy',ds:'Solid easy run. Building your aerobic base.'},
+{d:'D2',wo:false,t:'Rest',ds:'Rest.'},
+{d:'D3',wo:true,t:'4km + Strides',ds:'Easy 4km then 4x100m strides.'},
+{d:'D4',wo:false,t:'Rest',ds:'Rest.'},
+{d:'D5',wo:true,t:'5KM FIRST 5k!',ds:'YOUR FIRST 5KM since the injury! Take it easy and ENJOY every step.'},
+{d:'D6',wo:false,t:'Rest + Celebrate!',ds:'You ran 5km after Lisfranc. Rest and be proud.'},
+{d:'D7',wo:false,t:'REST + Weigh-In',ds:'Rest. 8 weeks. Check your progress!'}]},
+{w:9,ph:'run',title:'Running Phase 6km',days:[
+{d:'D1',wo:true,t:'5km Easy',ds:'You are in the running phase! Strong consistent effort.'},
+{d:'D2',wo:false,t:'Rest',ds:'Rest.'},
+{d:'D3',wo:true,t:'5km + Strides',ds:'5km easy + 4x100m strides.'},
+{d:'D4',wo:false,t:'Rest',ds:'Rest.'},
+{d:'D5',wo:true,t:'6km Long Run',ds:'New distance record! Easy pace.'},
+{d:'D6',wo:false,t:'Active Rest',ds:'Walk and stretch.'},
+{d:'D7',wo:false,t:'REST + Weigh-In',ds:'Rest. Weigh-in!'}]},
+{w:10,ph:'run',title:'Building to 8km',days:[
+{d:'D1',wo:true,t:'5km Easy',ds:'Easy recovery run.'},
+{d:'D2',wo:false,t:'Rest',ds:'Rest.'},
+{d:'D3',wo:true,t:'5km Tempo Effort',ds:'Start easy, middle 2km comfortably hard, finish easy.'},
+{d:'D4',wo:false,t:'Rest',ds:'Rest.'},
+{d:'D5',wo:true,t:'8km Long Run',ds:'New record! Easy pace.'},
+{d:'D6',wo:false,t:'Active Rest',ds:'Walk and recover.'},
+{d:'D7',wo:false,t:'REST + Weigh-In',ds:'Rest. Weigh-in!'}]},
+{w:11,ph:'run',title:'First 10km!',days:[
+{d:'D1',wo:true,t:'6km Easy',ds:'Easy run.'},
+{d:'D2',wo:false,t:'Rest',ds:'Rest.'},
+{d:'D3',wo:true,t:'6km Easy + Strides',ds:'6km + 4x100m strides.'},
+{d:'D4',wo:false,t:'Rest',ds:'Rest.'},
+{d:'D5',wo:true,t:'10KM FIRST 10k!',ds:'YOUR FIRST 10KM! Easy pace, hydrate well. Incredible comeback!'},
+{d:'D6',wo:false,t:'Rest + Celebrate!',ds:'You ran 10km. Be very proud.'},
+{d:'D7',wo:false,t:'REST + Weigh-In',ds:'Rest. 11 weeks. Weigh-in!'}]},
+{w:12,ph:'run',title:'Consolidate 10km',days:[
+{d:'D1',wo:true,t:'6km Easy',ds:'Easy recovery run.'},
+{d:'D2',wo:false,t:'Rest',ds:'Rest.'},
+{d:'D3',wo:true,t:'6km + Strides',ds:'6km easy + 4x100m strides.'},
+{d:'D4',wo:false,t:'Rest',ds:'Rest.'},
+{d:'D5',wo:true,t:'10km Easy',ds:'Second 10km. Feels easier? That is fitness building!'},
+{d:'D6',wo:false,t:'Active Rest',ds:'Walk and stretch.'},
+{d:'D7',wo:false,t:'REST + Weigh-In',ds:'Rest. Weigh-in!'}]},
+{w:13,ph:'run',title:'12km Long Run',days:[
+{d:'D1',wo:true,t:'6km Easy',ds:'Easy run.'},
+{d:'D2',wo:false,t:'Rest',ds:'Rest.'},
+{d:'D3',wo:true,t:'7km Easy + Strides',ds:'7km + 4x100m strides.'},
+{d:'D4',wo:false,t:'Rest',ds:'Rest.'},
+{d:'D5',wo:true,t:'12km Long Run',ds:'New record! Easy pace. Bring water.'},
+{d:'D6',wo:false,t:'Active Rest',ds:'Walk and recover.'},
+{d:'D7',wo:false,t:'REST + Weigh-In',ds:'Rest. Weigh-in!'}]},
+{w:14,ph:'run',title:'15km Long Run',days:[
+{d:'D1',wo:true,t:'6km Easy',ds:'Easy run.'},
+{d:'D2',wo:false,t:'Rest',ds:'Rest.'},
+{d:'D3',wo:true,t:'7km Easy',ds:'Easy run.'},
+{d:'D4',wo:false,t:'Rest',ds:'Rest.'},
+{d:'D5',wo:true,t:'15km Long Run',ds:'3/4 of the half marathon! Easy pace, fuel at 45 min.'},
+{d:'D6',wo:false,t:'Active Rest',ds:'Walk gently. Recover well.'},
+{d:'D7',wo:false,t:'REST + Weigh-In',ds:'Rest. Weigh-in. So close!'}]},
+{w:15,ph:'run',title:'Taper + 18km Final Long',days:[
+{d:'D1',wo:true,t:'5km Easy',ds:'Short easy run. Feel fresh and light.'},
+{d:'D2',wo:false,t:'Rest',ds:'Rest. Sleep well. Save your legs.'},
+{d:'D3',wo:true,t:'18km Long Run',ds:'Final big run! Practice race fuel and hydration. You are ready.'},
+{d:'D4',wo:false,t:'Rest',ds:'Rest. You did 18km!'},
+{d:'D5',wo:true,t:'4km Easy + Strides',ds:'Keep legs loose. 4x100m strides. Short and done.'},
+{d:'D6',wo:false,t:'Rest + Race Prep',ds:'Lay out your kit. Plan race nutrition.'},
+{d:'D7',wo:false,t:'REST + Weigh-In',ds:'Rest. Final weigh-in before race day!'}]},
+{w:16,ph:'run',title:'HALF MARATHON 21km!',days:[
+{d:'D1',wo:false,t:'Rest',ds:'Full rest. Trust every day of work. You are ready.'},
+{d:'D2',wo:false,t:'Rest',ds:'Rest. Hydrate well. Eat normally.'},
+{d:'D3',wo:false,t:'Rest',ds:'Rest. Light walk only.'},
+{d:'D4',wo:false,t:'Rest',ds:'Rest. Check kit. Set alarm.'},
+{d:'D5',wo:false,t:'10 Min Shake-Out',ds:'10 minutes easy only. Rest the remainder of the day.'},
+{d:'D6',wo:true,t:'21KM HALF MARATHON!',ds:'YOU DID IT. From a Lisfranc boot to 21km. Run it, feel it, own every step. You are a runner.'},
+{d:'D7',wo:false,t:'Celebrate + Final Weigh-In',ds:'Rest and celebrate. Log your final weight. Look how far you have come!'}]}
+];
+
+var S=load(),TI=null;
+function def(){return{v:6,isFasting:false,fastStart:null,waterGlasses:0,totalFasts:0,totalFastHours:0,streakDays:0,lastFastDate:null,weights:[],weightGoal:null,runDays:{},runLogs:{},logs:[]};}
+function load(){try{var r=localStorage.getItem(K);if(!r)return def();return Object.assign(def(),JSON.parse(r));}catch(e){return def();}}
+function save(){try{localStorage.setItem(K,JSON.stringify(S));}catch(e){}}
+function alog(type,status,val,detail,dl){S.logs.push({ts:Date.now(),type:type,status:status,val:val||null,detail:detail||'',dateLabel:dl||fd(Date.now())});if(S.logs.length>300)S.logs=S.logs.slice(-300);}
+
+function sp(id){
+  document.querySelectorAll('.pg').forEach(function(p){p.classList.remove('on');});
+  document.querySelectorAll('.nb').forEach(function(b){b.classList.remove('on');});
+  document.getElementById('pg-'+id).classList.add('on');
+  var m={dash:0,fast:1,run:2,body:3,hist:4};
+  document.querySelectorAll('.nb')[m[id]].classList.add('on');
+  if(id==='run')renderRun();
+  if(id==='body')renderWG();
+  if(id==='hist'){renderHistory();renderCharts();}
+  if(id==='fast'){
+    var now=new Date();
+    var local=new Date(now-now.getTimezoneOffset()*60000).toISOString().slice(0,16);
+    var ms=document.getElementById('manualStart');
+    var me=document.getElementById('manualEnd');
+    if(ms&&!ms.value)ms.value=local;
+    if(me&&!me.value)me.value=local;
+  }
+  updateDash();
+}
+
+function handleBtn(){if(!S.isFasting)startFast();else endFast();}
+function startFast(){S.isFasting=true;S.fastStart=Date.now();S.waterGlasses=0;save();renderWater();startUI();document.getElementById('recB').classList.remove('on');document.getElementById('skipFBtn').style.display='none';notif('&#9203;','Fast started! 19 hours begins now.');}
+function restoreFast(){} // deprecated
+function skipFast(){var today=new Date().toDateString();if(S.lastFastDate===today){notif('&#9989;','Already logged today!');return;}alog('fast','skip',0,'Did not fast - '+fs(Date.now()),fd(Date.now()));save();document.getElementById('skipFBtn').style.display='none';updateDash();notif('&#128197;','Skip logged. Back at it tomorrow!');}
+function endFast(){
+  if(!S.fastStart)return;
+  var e=(Date.now()-S.fastStart)/3600000;
+  S.totalFasts++;S.totalFastHours+=e;
+  var td=new Date().toDateString();
+  if(S.lastFastDate!==td){var y=new Date(Date.now()-86400000).toDateString();S.streakDays=(S.lastFastDate===y)?S.streakDays+1:1;S.lastFastDate=td;}
+  alog('fast','complete',e,'Fast #'+S.totalFasts+' - '+fs(Date.now())+' - '+e.toFixed(1)+'h',fd(Date.now()));
+  S.isFasting=false;S.fastStart=null;clearInterval(TI);save();idleUI();updateFS();updateDash();
+  notif('&#127881;','Fast #'+S.totalFasts+' complete! '+e.toFixed(1)+'h');
+}
+function startUI(){document.getElementById('tcard').classList.add('on');document.getElementById('mbtn').textContent='Stop Fast';document.getElementById('mbtn').className='btn stop';document.getElementById('skipFBtn').style.display='none';clearInterval(TI);TI=setInterval(tick,1000);tick();}
+function idleUI(){document.getElementById('tcard').classList.remove('on');document.getElementById('plbl').textContent='READY TO START';document.getElementById('plbl').className='pl';document.getElementById('tdisp').textContent='00:00:00';document.getElementById('tsub').textContent='tap to start';document.getElementById('ptxt').innerHTML='Start your <strong>19-hour fast</strong> now';document.getElementById('mbtn').textContent='Start Fast';document.getElementById('mbtn').className='btn';document.getElementById('rprog').style.strokeDashoffset=CIRC;document.getElementById('rprog').className='rp';document.getElementById('skipFBtn').style.display='block';}
+function tick(){
+  if(!S.fastStart)return;
+  var el=Date.now()-S.fastStart,rem=Math.max(0,FM-el),pct=Math.min(el/FM,1);
+  var h=Math.floor(el/3600000),m=Math.floor((el%3600000)/60000),s=Math.floor((el%60000)/1000);
+  document.getElementById('tdisp').textContent=z(h)+':'+z(m)+':'+z(s);
+  var rh=Math.floor(rem/3600000),rm2=Math.floor((rem%3600000)/60000);
+  if(rem>0){document.getElementById('tsub').textContent=rh+'h '+rm2+'m remaining';document.getElementById('plbl').textContent='FASTING';document.getElementById('plbl').className='pl f';document.getElementById('ptxt').innerHTML='<strong>'+Math.round(pct*100)+'%</strong> of 19-hour fast complete';}
+  else{document.getElementById('tsub').textContent='Goal reached!';document.getElementById('plbl').textContent='GOAL REACHED';document.getElementById('plbl').className='pl d pulsing';document.getElementById('ptxt').innerHTML='<strong>19 hours complete!</strong> End your fast when ready';}
+  document.getElementById('rprog').style.strokeDashoffset=CIRC-(pct*CIRC);
+  document.getElementById('rprog').className='rp'+(pct>=1?' d':'');
+  updateDash();
+}
+function z(n){return(n<10?'0':'')+n;}
+function updateFS(){document.getElementById('f-tot').textContent=S.totalFasts;document.getElementById('f-avg').textContent=(S.totalFasts>0?(S.totalFastHours/S.totalFasts).toFixed(1):0)+'h';}
+
+function renderWater(){
+  var c=document.getElementById('glasses');c.innerHTML='';
+  for(var i=0;i<WG;i++){var g=document.createElement('div');g.className='gl'+(i<S.waterGlasses?' on':'');(function(x){g.onclick=function(){S.waterGlasses=x+1;save();renderWater();updateDash();};})(i);c.appendChild(g);}
+  document.getElementById('wcnt').textContent=(S.waterGlasses*250)+'ml/2500ml';
+  document.getElementById('wsub').textContent=S.waterGlasses+' of '+WG+' glasses';
+}
+function addWater(){if(S.waterGlasses<WG){S.waterGlasses++;save();renderWater();updateDash();if(S.waterGlasses===WG)notif('&#128167;','Water goal reached!');else notif('&#128167;','Glass '+S.waterGlasses+'! '+((WG-S.waterGlasses)*250)+'ml to go.');}else notif('&#9989;','Water goal complete!');}
+
+function skipRunDay(){alog('run','skip',0,'Did not run - '+fs(Date.now()),fd(Date.now()));save();notif('&#128197;','Skip logged. Rest up!');}
+
+function saveRunLog(wk,day,sk){
+  var dist=parseFloat(document.getElementById('dist-'+sk).value)||0;
+  var time=parseFloat(document.getElementById('time-'+sk).value)||0;
+  var paceEl=document.getElementById('pace-'+sk);
+  var pace=paceEl?paceEl.value.trim():'';
+  if(dist===0&&time===0){notif('&#9888;','Enter distance or time');return;}
+  if(!S.runLogs)S.runLogs={};
+  S.runLogs[sk]={dist:dist,time:time,pace:pace,ts:Date.now()};
+  var detail='Wk'+wk+' '+day+' - '+fs(Date.now());
+  if(dist>0)detail+=', '+dist+'km';
+  if(time>0)detail+=', '+time+'min';
+  if(pace)detail+=', pace '+pace+'/km';
+  alog('run','complete',wk,detail,fd(Date.now()));
+  save();
+  var sl=document.getElementById('saved-'+sk);
+  sl.style.display='block';
+  sl.textContent='Saved: '+(dist?dist+'km ':' ')+(time?time+'min ':' ')+(pace?'@ '+pace+'/km':'');
+  notif('&#127939;',(dist?dist+'km ':'')+(time?'in '+time+'min ':'')+(pace?'@ '+pace+'/km':'')+'logged!');
+}
+
+function toggleRunDay(w,d){
+  var k='w'+w+'-'+d;
+  if(S.runDays[k]==='done'){S.runDays[k]='none';}
+  else{S.runDays[k]='done';alog('run','complete',w,'Wk'+w+' '+d+' - '+fs(Date.now()),fd(Date.now()));}
+  save();updateRunProg();updateDash();renderRun();
+}
+
+function updateRunProg(){
+  var done=Object.values(S.runDays).filter(function(v){return v==='done';}).length;
+  var tot=0;RP.forEach(function(w){w.days.forEach(function(d){if(d.wo)tot++;});});
+  var pct=Math.round((done/tot)*100);
+  var wkd=cwd();
+  if(document.getElementById('r-fill')){document.getElementById('r-fill').style.width=pct+'%';document.getElementById('r-dc').textContent=wkd+' of 16 weeks';document.getElementById('r-pct').textContent=pct+'%';}
+}
+function cwd(){var n=0;RP.forEach(function(wk){var a=true;wk.days.forEach(function(d){if(d.wo&&S.runDays['w'+wk.w+'-'+d.d]!=='done')a=false;});if(a)n++;});return n;}
+
+function renderRun(){
+  var c=document.getElementById('run-weeks');c.innerHTML='';
+  var wksd=cwd();
+  RP.forEach(function(wk){
+    var phCl=wk.ph==='walk'?'pw':wk.ph==='walkjog'?'pwj':wk.ph==='jog'?'pj':'pr';
+    var phNm=wk.ph==='walk'?'Walk':wk.ph==='walkjog'?'Walk-Jog':wk.ph==='jog'?'Jog':'Run';
+    var isCur=wk.w===wksd+1;var isPast=wk.w<=wksd;
+    var outer=document.createElement('div');outer.className='wk';
+    if(isCur)outer.style.border='1px solid rgba(0,150,255,.5)';
+    if(isPast)outer.style.opacity='0.7';
+    var hdr=document.createElement('div');hdr.className='wkh';
+    hdr.innerHTML='<div class="wkinfo"><div class="wkn">Week '+wk.w+' of 16'+(isCur?' &bull; <span style="color:#0096ff">CURRENT</span>':'')+'</div><div class="wkt">'+(isPast?'&#9989; ':'')+wk.title+'</div></div><span class="wkph '+phCl+'">'+phNm+'</span>';
+    outer.appendChild(hdr);
+    var body=document.createElement('div');body.className='wkb';body.style.display=isCur?'block':'none';
+    hdr.onclick=function(){body.style.display=body.style.display==='none'?'block':'none';};
+    wk.days.forEach(function(day){
+      var row=document.createElement('div');row.className='dayrow';
+      var k='w'+wk.w+'-'+day.d;
+      var st=S.runDays[k]||'none';
+      var saved=S.runLogs&&S.runLogs[k]?S.runLogs[k]:null;
+      var btnHtml=!day.wo?'<div class="day-rest">Rest</div>':st==='done'?'<button class="day-done" onclick="toggleRunDay('+wk.w+',\''+day.d+'\')">&#9989; Done</button>':'<button class="day-todo" onclick="toggleRunDay('+wk.w+',\''+day.d+'\')">Mark Done</button>';
+      var topDiv=document.createElement('div');topDiv.className='dayrow-top';
+      topDiv.innerHTML='<div class="dayn">'+day.d+'</div><div style="flex:1;min-width:0;"><div class="dayt">'+day.t+'</div><div class="dayd">'+day.ds+'</div></div><div style="flex-shrink:0;margin-left:8px;">'+btnHtml+'</div>';
+      row.appendChild(topDiv);
+      if(day.wo){
+        var logDiv=document.createElement('div');logDiv.className='run-log';
+        var savedTxt=saved?('Saved: '+(saved.dist?saved.dist+'km ':' ')+(saved.time?saved.time+'min':'')):'';
+        var scanBtnHtml='<button class="scan-btn" onclick="scanGarmin(\''+k+'\')" >&#128247; Scan Garmin Watch</button>';
+        logDiv.innerHTML=scanBtnHtml+'<div style="display:flex;gap:8px;margin-top:8px;"><div class="run-log-f"><div class="run-log-lbl">&#128205; km</div><input type="number" class="rli" id="dist-'+k+'" placeholder="5.2" step="0.1" value="'+(saved?saved.dist:'')+'" min="0" max="50"></div><div class="run-log-f"><div class="run-log-lbl">&#9201; min</div><input type="number" class="rli" id="time-'+k+'" placeholder="28" step="1" value="'+(saved?saved.time:'')+'" min="0" max="300"></div><div class="run-log-f"><div class="run-log-lbl">&#128198; pace/km</div><input type="text" class="rli" id="pace-'+k+'" placeholder="5:30" value="'+(saved&&saved.pace?saved.pace:'')+'"></div></div>';
+        var sb=document.createElement('button');sb.className='rlsave';sb.innerHTML=saved?'&#9989; Update Log':'&#128229; Save Distance &amp; Time';
+        var sl=document.createElement('div');sl.className='rlsaved';sl.id='saved-'+k;sl.textContent=savedTxt;if(saved)sl.style.display='block';
+        (function(wn,dn,sk2){sb.onclick=function(){saveRunLog(wn,dn,sk2);};})(wk.w,day.d,k);
+        logDiv.appendChild(sb);logDiv.appendChild(sl);row.appendChild(logDiv);
+      }
+      body.appendChild(row);
+    });
+    outer.appendChild(body);c.appendChild(outer);
+  });
+  updateRunProg();
+}
+
+function renderCharts(){
+  var logs=[];
+  if(S.runLogs){Object.keys(S.runLogs).forEach(function(k){var l=S.runLogs[k];if(l.dist>0||l.time>0)logs.push({key:k,dist:l.dist||0,time:l.time||0,pace:l.pace||'',ts:l.ts});});}
+  logs.sort(function(a,b){return a.ts-b.ts;});
+  var card=document.getElementById('run-charts-card');
+  if(logs.length<2){card.style.display='none';return;}
+  card.style.display='block';
+  drawChart('dist-chart','dist-labels',logs,'dist','km','#00e5a0');
+  drawChart('time-chart','time-labels',logs,'time','min','#0096ff');
+  // Pace chart - convert "5:30" to decimal minutes
+  var paceLogs=logs.filter(function(l){return l.pace&&l.pace.indexOf(':')>0;});
+  if(paceLogs.length>=2){
+    document.getElementById('pace-chart-lbl').style.display='block';
+    document.getElementById('pace-chart-wrap').style.display='block';
+    var paceDecimal=paceLogs.map(function(l){
+      var parts=l.pace.split(':');
+      return {key:l.key,paceNum:parseInt(parts[0])+(parseInt(parts[1])||0)/60,ts:l.ts};
+    });
+    drawChart('pace-chart','pace-labels',paceDecimal,'paceNum','min/km','#a855f7');
+  }
+}
+
+function drawChart(svgId,lblId,data,field,unit,color){
+  var svg=document.getElementById(svgId);svg.innerHTML='';
+  var wrap=svg.parentElement;
+  var W=wrap.offsetWidth||320,H=130;
+  var vals=data.map(function(d){return d[field];});
+  var mn=Math.max(0,Math.min.apply(null,vals)-1),mx=Math.max.apply(null,vals)+1;
+  if(mx===mn)mx=mn+1;
+  var xs=data.length>1?W/(data.length-1):W;
+  function gy(v){return H-((v-mn)/(mx-mn))*(H*.75)-H*.12;}
+  var aD='M0 '+H;data.forEach(function(d,i){aD+=' L'+(i*xs)+' '+gy(d[field]);});aD+=' L'+((data.length-1)*xs)+' '+H+' Z';
+  var area=document.createElementNS('http://www.w3.org/2000/svg','path');area.setAttribute('d',aD);area.setAttribute('fill',color);area.setAttribute('opacity','0.08');svg.appendChild(area);
+  var lD='';data.forEach(function(d,i){lD+=(i===0?'M':'L')+(i*xs)+' '+gy(d[field]);});
+  var line=document.createElementNS('http://www.w3.org/2000/svg','path');line.setAttribute('d',lD);line.setAttribute('fill','none');line.setAttribute('stroke',color);line.setAttribute('stroke-width','2.5');line.setAttribute('stroke-linecap','round');line.setAttribute('stroke-linejoin','round');svg.appendChild(line);
+  data.forEach(function(d,i){
+    var x=i*xs,y=gy(d[field]);
+    var dot=document.createElementNS('http://www.w3.org/2000/svg','circle');dot.setAttribute('cx',x);dot.setAttribute('cy',y);dot.setAttribute('r','4');dot.setAttribute('fill',color);svg.appendChild(dot);
+    if(d[field]>0){var lbl=document.createElementNS('http://www.w3.org/2000/svg','text');lbl.setAttribute('x',x);lbl.setAttribute('y',y-8);lbl.setAttribute('text-anchor','middle');lbl.setAttribute('fill','#e8f0fe');lbl.setAttribute('font-size','9');lbl.textContent=d[field]+unit;svg.appendChild(lbl);}
+  });
+  var el=document.getElementById(lblId);
+  el.innerHTML=data.map(function(d){return '<span>'+d.key.replace('w','W').replace('-',' ')+'</span>';}).join('');
+}
+
+function logWeight(){
+  var v=parseFloat(document.getElementById('win').value);
+  if(isNaN(v)||v<20||v>300){notif('&#9888;','Enter a valid weight in kg');return;}
+  S.weights.push({ts:Date.now(),val:v});if(S.weights.length>52)S.weights=S.weights.slice(-52);
+  alog('weight','complete',v,'Weigh-in: '+v+'kg - '+fs(Date.now()),fd(Date.now()));
+  document.getElementById('win').value='';save();renderWG();updateDash();
+  notif('&#9878;',v+'kg logged on '+fs(Date.now()));
+}
+function setGoal(){var v=parseFloat(document.getElementById('wgi').value);if(isNaN(v)||v<20||v>300){notif('&#9888;','Enter valid goal');return;}S.weightGoal=v;document.getElementById('wgi').value='';save();renderWG();updateDash();notif('&#127919;','Goal: '+v+'kg!');}
+function renderWG(){
+  var last=S.weights.slice(-8);var cur=last.length>0?last[last.length-1].val:null;
+  document.getElementById('w-cur').textContent=cur?cur.toFixed(1):'--';
+  document.getElementById('w-goal').textContent=S.weightGoal?S.weightGoal+'kg':'-- kg';
+  if(cur&&S.weightGoal){var diff=cur-S.weightGoal;document.getElementById('w-diff').innerHTML=diff>0?'<span style="color:#f59e0b;">'+diff.toFixed(1)+'kg to goal</span>':'<span style="color:#00e5a0;">&#127881; Goal reached!</span>';}
+  else document.getElementById('w-diff').innerHTML='';
+  var svg=document.getElementById('wsvg');svg.innerHTML='';
+  if(last.length<2){var t=document.createElementNS('http://www.w3.org/2000/svg','text');t.setAttribute('x','50%');t.setAttribute('y','50%');t.setAttribute('text-anchor','middle');t.setAttribute('fill','#5a7090');t.setAttribute('font-size','11');t.setAttribute('dy','.3em');t.textContent='Log weight on Sundays to see graph';svg.appendChild(t);document.getElementById('wlbl').innerHTML='';return;}
+  var W=document.getElementById('wgw').offsetWidth||300,H=110;
+  var vals=last.map(function(e){return e.val;});var mn=Math.min.apply(null,vals)-1.5,mx=Math.max.apply(null,vals)+1.5;var xs=W/(last.length-1);
+  function gy2(v){return H-((v-mn)/(mx-mn))*(H*.8)-H*.1;}
+  var d='';last.forEach(function(pt,i){d+=(i===0?'M':'L')+(i*xs)+' '+gy2(pt.val);});
+  var path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d',d);path.setAttribute('fill','none');path.setAttribute('stroke','#f59e0b');path.setAttribute('stroke-width','2.5');path.setAttribute('stroke-linecap','round');path.setAttribute('stroke-linejoin','round');svg.appendChild(path);
+  last.forEach(function(pt,i){var x=i*xs,y=gy2(pt.val);var dot=document.createElementNS('http://www.w3.org/2000/svg','circle');dot.setAttribute('cx',x);dot.setAttribute('cy',y);dot.setAttribute('r','4');dot.setAttribute('fill','#f59e0b');svg.appendChild(dot);var lbl=document.createElementNS('http://www.w3.org/2000/svg','text');lbl.setAttribute('x',x);lbl.setAttribute('y',y-7);lbl.setAttribute('text-anchor','middle');lbl.setAttribute('fill','#e8f0fe');lbl.setAttribute('font-size','9');lbl.textContent=pt.val.toFixed(1);svg.appendChild(lbl);});
+  if(S.weightGoal&&S.weightGoal>=mn&&S.weightGoal<=mx){var gl=document.createElementNS('http://www.w3.org/2000/svg','line');gl.setAttribute('x1',0);gl.setAttribute('y1',gy2(S.weightGoal));gl.setAttribute('x2',W);gl.setAttribute('y2',gy2(S.weightGoal));gl.setAttribute('stroke','#00e5a0');gl.setAttribute('stroke-width','1.5');gl.setAttribute('stroke-dasharray','4 4');svg.appendChild(gl);}
+  var lb=last.map(function(pt){return fs(pt.ts);}).join('</span><span>');
+  document.getElementById('wlbl').innerHTML='<span>'+lb+'</span>';
+}
+
+function deleteLog(idx){
+  if(!confirm('Delete this entry?'))return;
+  S.logs.splice(idx,1);
+  save();renderHistory();renderCharts();
+  notif('&#128465;','Entry deleted.');
+}
+
+function deleteRunLog(key){
+  if(!confirm('Delete this run log?'))return;
+  if(S.runLogs&&S.runLogs[key]){
+    delete S.runLogs[key];
+    save();renderHistory();renderCharts();
+    notif('&#128465;','Run log deleted.');
+  }
+}
+
+function renderHistory(){
+  var c=document.getElementById('hist-content');
+  if(!S.logs||S.logs.length===0){c.innerHTML='<div class="empty">&#128196; No history yet.<br><br>Complete a fast, log a run, or weigh in to see your records here!</div>';return;}
+  // build reverse indexed list
+  var indexed=[];
+  S.logs.forEach(function(l,i){indexed.push({log:l,idx:i});});
+  indexed.reverse();
+  var grouped={};
+  indexed.forEach(function(item){
+    var g=item.log.dateLabel||fd(item.log.ts);
+    if(!grouped[g])grouped[g]=[];
+    grouped[g].push(item);
+  });
+  var html='';
+  Object.keys(grouped).forEach(function(dl){
+    html+='<div class="hday"><div class="hdate">&#128197; '+dl+'</div>';
+    grouped[dl].forEach(function(item){
+      var l=item.log;var idx=item.idx;
+      var icon='',color='',title='',sub='',badge='';
+      if(l.type==='fast'){
+        icon='&#9203;';color=l.status==='complete'?'rgba(0,229,160,.12)':'rgba(255,107,53,.12)';
+        title=l.status==='complete'?'Fast Completed':'Fast Skipped';
+        sub=l.detail||'';
+        badge=l.status==='complete'?'<span class="hbadge hc">'+l.val.toFixed(1)+'h</span>':'<span class="hbadge hs">Skipped</span>';
+      }else if(l.type==='run'){
+        icon='&#127939;';color=l.status==='complete'?'rgba(0,150,255,.12)':'rgba(255,107,53,.12)';
+        title=l.status==='complete'?'Run Completed':'Run Skipped';
+        sub=l.detail||'';
+        badge=l.status==='complete'?'<span class="hbadge" style="background:rgba(0,150,255,.1);color:#0096ff;">Done</span>':'<span class="hbadge hs">Skipped</span>';
+      }else if(l.type==='weight'){
+        icon='&#9878;';color='rgba(245,158,11,.12)';
+        title='Weekly Weigh-In';sub=l.detail||'';
+        badge='<span class="hbadge" style="background:rgba(245,158,11,.1);color:#f59e0b;">'+l.val+'kg</span>';
+      }
+      var delBtn='<button onclick="deleteLog('+idx+')" style="background:none;border:1px solid rgba(255,107,53,.3);color:#ff6b35;border-radius:8px;padding:4px 8px;font-size:10px;cursor:pointer;margin-top:4px;width:100%;">&#128465; Delete</button>';
+      html+='<div class="hrow" style="flex-wrap:wrap;">'+
+        '<div class="hicon" style="background:'+color+';">'+icon+'</div>'+
+        '<div style="flex:1;min-width:0;"><div class="htitle">'+title+'</div><div class="hsub" style="white-space:normal;">'+sub+'</div>'+
+        (l.type==='run'?delBtn:'')+'</div>'+
+        '<div style="flex-shrink:0;margin-left:8px;">'+badge+'</div>'+
+        '</div>';
+    });
+    html+='</div>';
+  });
+  c.innerHTML=html;
+}
+
+
+function updateDash(){
+  document.getElementById('d-str').textContent=S.streakDays;
+  if(S.isFasting&&S.fastStart){var el=Date.now()-S.fastStart;var h=Math.floor(el/3600000),m=Math.floor((el%3600000)/60000);document.getElementById('d-ft').textContent=z(h)+':'+z(m);document.getElementById('d-fs').textContent=Math.round(Math.min(el/FM,1)*100)+'% complete';}
+  else{document.getElementById('d-ft').textContent='Start';document.getElementById('d-fs').textContent='19hr fast';}
+  document.getElementById('d-wa').textContent=S.waterGlasses+'/10';document.getElementById('d-ws').textContent=(S.waterGlasses*250)+'ml today';
+  if(S.weights.length>0){var lw=S.weights[S.weights.length-1];document.getElementById('d-wt').textContent=lw.val.toFixed(1);document.getElementById('d-wts').textContent=S.weightGoal?'Goal: '+S.weightGoal+'kg':'Set a goal';}
+  else{document.getElementById('d-wt').textContent='--';document.getElementById('d-wts').textContent='Log Sundays';}
+  var wkd=cwd();var tot=0;RP.forEach(function(w){w.days.forEach(function(d){if(d.wo)tot++;});});
+  var done=Object.values(S.runDays).filter(function(v){return v==='done';}).length;
+  document.getElementById('d-rw').textContent='Wk '+(wkd+1);document.getElementById('d-rs').textContent=Math.round((done/tot)*100)+'%';
+  var curWk=RP[Math.min(wkd,15)];var nextWO=null;
+  for(var i=0;i<curWk.days.length;i++){var dd=curWk.days[i];if(dd.wo&&S.runDays['w'+curWk.w+'-'+dd.d]!=='done'){nextWO=dd;break;}}
+  if(!nextWO)for(var j=0;j<curWk.days.length;j++){if(!curWk.days[j].wo){nextWO=curWk.days[j];break;}}
+  if(nextWO){document.getElementById('d-rt').textContent=nextWO.wo?nextWO.t:'Rest Day - '+curWk.title;document.getElementById('d-rd').textContent=nextWO.ds;}
+}
+
+function exportData(){var el=document.getElementById('export-txt');el.style.display='block';el.value=JSON.stringify(S,null,2);el.select();try{document.execCommand('copy');notif('&#128190;','All data copied!');}catch(e){notif('&#128190;','Copy the text from the box below');}}
+function showImport(){var el=document.getElementById('import-area');el.style.display=el.style.display==='none'?'block':'none';}
+function importData(){try{var d=JSON.parse(document.getElementById('import-txt').value.trim());S=Object.assign(def(),d);save();init();document.getElementById('import-area').style.display='none';document.getElementById('import-txt').value='';notif('&#9989;','All data restored!');}catch(e){notif('&#9888;','Invalid data.');}}
+function resetAll(){if(confirm('Reset ALL data? Cannot be undone.')){clearInterval(TI);S=def();save();init();notif('&#8635;','All data reset.');}}
+
+var ntT;
+function notif(icon,txt){document.getElementById('ni').innerHTML=icon;document.getElementById('nt').textContent=txt;var el=document.getElementById('notif');el.classList.add('on');clearTimeout(ntT);ntT=setTimeout(function(){el.classList.remove('on');},3500);}
+
+// ASK CLAUDE — opens claude.ai with health context pre-filled
+// ASK CLAUDE — inline chat with Anthropic API
+var cHist=[],cLoad=false;
+var AKEY=atob('c2stYW50LWFwaTAzLVVOV2VYaXFHTDFMbUNwTld1cWc2WTczQURONEhjVV9jbWloVEdZczY4Nl9PM0FvVS1vNnFiZU5ZOXh0M3lNZmp4NHEtR1lSV3paSkpRR09GOFBoZ0F3LXRyTUI2UUFB');
+
+function openC(){
+  document.getElementById('coverlay').classList.add('on');
+  scrollC();
+}
+function closeC(){document.getElementById('coverlay').classList.remove('on');}
+function overlayC(e){if(e.target===document.getElementById('coverlay'))closeC();}
+function qa(q){document.getElementById('cin').value=q;sendC();}
+function ckd(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendC();}}
+
+function bctx(){
+  var ctx='You are a helpful health and fitness assistant built into FastTrack, a personal health app. ';
+  ctx+='User is recovering from a Lisfranc foot injury (boot came off recently, doing external PT/rehab). ';
+  ctx+='They follow a 16-week running plan from 0 to 21km. Currently on week '+(cwd()+1)+' of 16. ';
+  ctx+='They do 19-hour intermittent fasting (8am-1pm eating window). Sunday weigh-ins. ';
+  ctx+='Stats — Fasts: '+S.totalFasts+'. ';
+  if(S.totalFasts>0)ctx+='Avg fast: '+(S.totalFastHours/S.totalFasts).toFixed(1)+'h. Streak: '+S.streakDays+'d. ';
+  if(S.weights.length>0)ctx+='Weight: '+S.weights[S.weights.length-1].val+'kg. ';
+  if(S.weightGoal)ctx+='Goal: '+S.weightGoal+'kg. ';
+  ctx+='Be encouraging and concise. Under 150 words. Plain text, no markdown. Always say to consult physio for foot pain.';
+  return ctx;
+}
+
+async function sendC(){
+  if(cLoad)return;
+  var inp=document.getElementById('cin');
+  var msg=inp.value.trim();
+  if(!msg)return;
+  inp.value='';
+  addCmsg(msg,'user');
+  cHist.push({role:'user',content:msg});
+  cLoad=true;
+  document.getElementById('csend').disabled=true;
+  var typing=addCmsg('Thinking...','ai typing');
+  try{
+    var res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key':AKEY,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body:JSON.stringify({
+        model:'claude-haiku-4-5-20251001',
+        max_tokens:300,
+        system:bctx(),
+        messages:cHist
+      })
+    });
+    var data=await res.json();
+    var reply='Sorry, could not get a response. Please try again.';
+    if(data.content&&data.content[0]&&data.content[0].text)reply=data.content[0].text;
+    typing.textContent=reply;
+    typing.className='cmsg ai';
+    cHist.push({role:'assistant',content:reply});
+    if(cHist.length>20)cHist=cHist.slice(-20);
+  }catch(e){
+    typing.textContent='Error: '+e.message+'. Check console for details.';
+    typing.className='cmsg ai';
+  }
+  cLoad=false;
+  document.getElementById('csend').disabled=false;
+  scrollC();
+}
+
+function addCmsg(text,cls){
+  var msgs=document.getElementById('cmsgs');
+  var el=document.createElement('div');
+  el.className='cmsg '+cls;
+  el.textContent=text;
+  msgs.appendChild(el);
+  scrollC();
+  return el;
+}
+function scrollC(){var msgs=document.getElementById('cmsgs');msgs.scrollTop=msgs.scrollHeight;}
+
+// ══ MANUAL FAST TIME ENTRY ══
+function setManualStart(){
+  var inp=document.getElementById('manualStart');
+  if(!inp.value){notif('&#9888;','Pick a start time first');return;}
+  var ts=new Date(inp.value).getTime();
+  if(isNaN(ts)){notif('&#9888;','Invalid time');return;}
+  if(ts>Date.now()){notif('&#9888;','Start time cannot be in the future');return;}
+  S.isFasting=true;S.fastStart=ts;S.waterGlasses=0;
+  save();renderWater();startUI();
+  notif('&#9203;','Fast started from '+inp.value.replace('T',' ')+'!');
+  inp.value='';
+}
+
+function logPastFast(){
+  var s=document.getElementById('manualStart');
+  var e=document.getElementById('manualEnd');
+  if(!s.value||!e.value){notif('&#9888;','Set both start and end time');return;}
+  var ts=new Date(s.value).getTime();
+  var te=new Date(e.value).getTime();
+  if(isNaN(ts)||isNaN(te)){notif('&#9888;','Invalid times');return;}
+  if(te<=ts){notif('&#9888;','End time must be after start time');return;}
+  if(te>Date.now()){notif('&#9888;','End time cannot be in the future');return;}
+  var hours=(te-ts)/3600000;
+  S.totalFasts++;S.totalFastHours+=hours;
+  var td=new Date(ts).toDateString();
+  if(S.lastFastDate!==td){
+    var y=new Date(ts-86400000).toDateString();
+    S.streakDays=(S.lastFastDate===y)?S.streakDays+1:1;
+    S.lastFastDate=td;
+  }
+  alog('fast','complete',hours,'Fast #'+S.totalFasts+' - '+fs(ts)+' - '+hours.toFixed(1)+'h (manual)',fd(ts));
+  save();updateFS();updateDash();
+  s.value='';e.value='';
+  notif('&#127881;','Past fast logged: '+hours.toFixed(1)+'h on '+fs(ts));
+}
+
+// ══ GARMIN PHOTO SCAN ══
+async function scanGarmin(key){
+  var input=document.createElement('input');
+  input.type='file';input.accept='image/*';input.capture='environment';
+  input.onchange=async function(e){
+    var file=e.target.files[0];if(!file)return;
+    document.getElementById('scanOverlay').classList.add('on');
+    var reader=new FileReader();
+    reader.onload=async function(ev){
+      var b64=ev.target.result.split(',')[1];
+      var mt=file.type||'image/jpeg';
+      try{
+        var res=await fetch('https://api.anthropic.com/v1/messages',{
+          method:'POST',
+          headers:{'Content-Type':'application/json','x-api-key':AKEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+          body:JSON.stringify({
+            model:'claude-haiku-4-5-20251001',
+            max_tokens:200,
+            messages:[{role:'user',content:[
+              {type:'image',source:{type:'base64',media_type:mt,data:b64}},
+              {type:'text',text:'This is a photo of a Garmin GPS watch or fitness device showing workout stats. Extract these values: distance in km, total time in minutes as a number, and pace as min:sec per km string. Reply ONLY with valid JSON like this: {"distance":5.2,"time":28,"pace":"5:22"}. If a value is not visible set it to null. Do not include any other text.'}
+            ]}]
+          })
+        });
+        var data=await res.json();
+        document.getElementById('scanOverlay').classList.remove('on');
+        if(data.content&&data.content[0]&&data.content[0].text){
+          try{
+            var clean=data.content[0].text.replace(/```json|```/g,'').trim();
+            var parsed=JSON.parse(clean);
+            if(parsed.distance&&document.getElementById('dist-'+key))document.getElementById('dist-'+key).value=parsed.distance;
+            if(parsed.time&&document.getElementById('time-'+key))document.getElementById('time-'+key).value=Math.round(parsed.time);
+            if(parsed.pace&&document.getElementById('pace-'+key))document.getElementById('pace-'+key).value=parsed.pace;
+            notif('&#9989;','Garmin data read! Review and save.');
+          }catch(pe){notif('&#9888;','Could not parse data. Fill in manually.');}
+        }else{
+          notif('&#9888;','Could not read image. Fill in manually.');
+        }
+      }catch(fe){
+        document.getElementById('scanOverlay').classList.remove('on');
+        notif('&#9888;','Scan failed. Check connection.');
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+
+// ══ VOICE INPUT ══
+var voiceRecog=null;
+function startVoice(){
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){notif('&#9888;','Voice not supported on this browser');return;}
+  var btn=document.getElementById('micBtn');
+  if(voiceRecog){voiceRecog.stop();voiceRecog=null;btn.className='cmic';btn.innerHTML='&#127908;';return;}
+  voiceRecog=new SR();
+  voiceRecog.lang='en-US';voiceRecog.continuous=false;voiceRecog.interimResults=false;
+  btn.className='cmic recording';btn.innerHTML='&#9899;';
+  voiceRecog.onresult=function(e){
+    document.getElementById('cin').value=e.results[0][0].transcript;
+    btn.className='cmic';btn.innerHTML='&#127908;';voiceRecog=null;
+    notif('&#127908;','Voice captured! Tap send.');
+  };
+  voiceRecog.onerror=function(){btn.className='cmic';btn.innerHTML='&#127908;';voiceRecog=null;notif('&#9888;','Voice failed. Try again.');};
+  voiceRecog.onend=function(){btn.className='cmic';btn.innerHTML='&#127908;';voiceRecog=null;};
+  voiceRecog.start();
+}
+
+// ══ PHOTO IN CHAT ══
+function pickPhotoForChat(){
+  var input=document.createElement('input');
+  input.type='file';input.accept='image/*';
+  input.onchange=async function(e){
+    var file=e.target.files[0];if(!file)return;
+    var reader=new FileReader();
+    reader.onload=async function(ev){
+      var b64=ev.target.result.split(',')[1];
+      var mt=file.type||'image/jpeg';
+      var userPrompt=document.getElementById('cin').value.trim()||'Please analyze this image in the context of my health and fitness goals.';
+      document.getElementById('cin').value='';
+      addCmsg('&#128247; '+userPrompt,'user');
+      var msgContent=[
+        {type:'image',source:{type:'base64',media_type:mt,data:b64}},
+        {type:'text',text:userPrompt}
+      ];
+      cHist.push({role:'user',content:msgContent});
+      cLoad=true;document.getElementById('csend').disabled=true;
+      var typing=addCmsg('Analyzing photo...','ai typing');
+      try{
+        var res=await fetch('https://api.anthropic.com/v1/messages',{
+          method:'POST',
+          headers:{'Content-Type':'application/json','x-api-key':AKEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+          body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:300,system:bctx(),messages:cHist})
+        });
+        var data=await res.json();
+        var reply='Could not analyze the photo.';
+        if(data.content&&data.content[0]&&data.content[0].text)reply=data.content[0].text;
+        typing.textContent=reply;typing.className='cmsg ai';
+        cHist.push({role:'assistant',content:reply});
+      }catch(fe){typing.textContent='Error analyzing photo.';typing.className='cmsg ai';}
+      cLoad=false;document.getElementById('csend').disabled=false;scrollC();
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+
+// ══ PATTERN ANALYSIS ══
+async function analyzePatterns(){
+  var btn=document.getElementById('patternBtn');
+  var result=document.getElementById('patternResult');
+  btn.disabled=true;btn.textContent='Analyzing...';
+  result.style.display='block';result.textContent='Claude is analyzing your data patterns...';
+  var summary='Analyze these personal health patterns and give 4-5 specific insights with actionable recommendations. Be direct and personal.\n\n';
+  var fastDone=S.logs.filter(function(l){return l.type==='fast'&&l.status==='complete';});
+  var fastSkip=S.logs.filter(function(l){return l.type==='fast'&&l.status==='skip';});
+  summary+='FASTING: '+fastDone.length+' completed fasts, '+fastSkip.length+' skipped. ';
+  if(fastDone.length>0){var avgH=fastDone.reduce(function(a,b){return a+b.val;},0)/fastDone.length;summary+='Average duration: '+avgH.toFixed(1)+'h. Streak: '+S.streakDays+' days. ';}
+  var runArr=[];
+  if(S.runLogs){Object.keys(S.runLogs).forEach(function(k){var l=S.runLogs[k];if(l.dist>0)runArr.push(l);});}
+  runArr.sort(function(a,b){return a.ts-b.ts;});
+  if(runArr.length>0){
+    summary+='\nRUNNING: '+runArr.length+' runs logged. ';
+    summary+='Distance range: '+runArr[0].dist+'km to '+runArr[runArr.length-1].dist+'km. ';
+    var withPace=runArr.filter(function(l){return l.pace;});
+    if(withPace.length>1)summary+='Pace: first '+withPace[0].pace+'/km, latest '+withPace[withPace.length-1].pace+'/km. ';
+    var runSkip=S.logs.filter(function(l){return l.type==='run'&&l.status==='skip';});
+    summary+='Run skips: '+runSkip.length+'. ';
+  }
+  if(S.weights.length>1){
+    var wF=S.weights[0].val,wL=S.weights[S.weights.length-1].val;
+    summary+='\nWEIGHT: Started '+wF+'kg, now '+wL+'kg. Change: '+(wF-wL).toFixed(1)+'kg lost. ';
+    if(S.weightGoal)summary+='Goal: '+S.weightGoal+'kg ('+(wL-S.weightGoal).toFixed(1)+'kg to go). ';
+  }
+  summary+='\nCONTEXT: Week '+(cwd()+1)+' of 16 run plan. Lisfranc recovery. 19-hour fasting. ';
+  summary+='Give specific patterns you notice and concrete next steps. Under 200 words. Plain text.';
+  try{
+    var res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':AKEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:400,messages:[{role:'user',content:summary}]})
+    });
+    var data=await res.json();
+    if(data.content&&data.content[0]&&data.content[0].text){result.textContent=data.content[0].text;}
+    else{result.textContent='Not enough data yet for pattern analysis. Keep logging your runs, fasts, and weight!';}
+  }catch(fe){result.textContent='Could not analyze patterns. Check your internet connection.';}
+  btn.disabled=false;btn.textContent='&#129302; Analyze My Patterns';
+}
+
+function init(){renderWater();updateFS();updateDash();if(!S.isFasting||!S.fastStart){idleUI();}else{startUI();}}
+init();
+</script>
+</body>
+</html>
