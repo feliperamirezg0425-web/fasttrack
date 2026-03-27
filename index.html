@@ -237,12 +237,11 @@ html,body{background:#0a0e14 !important;color:#e8f0fe !important;min-height:100v
       <button class="cqb" onclick="qa('What stretches are good for Lisfranc recovery?')">Stretches?</button>
     </div>
     <div class="cmsgs" id="cmsgs">
-      <div class="cmsg ai">Tap a quick question or type your own below. I will open Claude.ai with your full health context already included — Lisfranc recovery, fasting stats, weight goal, and current run week. &#128170;</div>
-      <div style="background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.2);border-radius:12px;padding:10px 14px;font-size:12px;color:#a855f7;margin-top:4px;line-height:1.5;">&#128279; Opens Claude.ai in a new tab with your personal context pre-filled — no setup needed.</div>
+      <div class="cmsg ai">Hi! I am your FastTrack health assistant. I know your fasting stats, Lisfranc recovery status, weight, and run plan. Ask me anything! &#128170;</div>
     </div>
     <div class="cinrow">
-      <textarea class="cin" id="cin" placeholder="Type your question, then tap send..." rows="1" onkeydown="ckd(event)"></textarea>
-      <button class="csend" id="csend" onclick="var m=document.getElementById('cin').value.trim();if(m)openClaude(m);">&#9650;</button>
+      <textarea class="cin" id="cin" placeholder="Ask anything about your health..." rows="1" onkeydown="ckd(event)"></textarea>
+      <button class="csend" id="csend" onclick="sendC()">&#9650;</button>
     </div>
   </div>
 </div>
@@ -624,33 +623,84 @@ var ntT;
 function notif(icon,txt){document.getElementById('ni').innerHTML=icon;document.getElementById('nt').textContent=txt;var el=document.getElementById('notif');el.classList.add('on');clearTimeout(ntT);ntT=setTimeout(function(){el.classList.remove('on');},3500);}
 
 // ASK CLAUDE — opens claude.ai with health context pre-filled
-function openC(){document.getElementById('coverlay').classList.add('on');}
+// ASK CLAUDE — inline chat with Anthropic API
+var cHist=[],cLoad=false;
+var AKEY='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';
+
+function openC(){
+  document.getElementById('coverlay').classList.add('on');
+  scrollC();
+}
 function closeC(){document.getElementById('coverlay').classList.remove('on');}
 function overlayC(e){if(e.target===document.getElementById('coverlay'))closeC();}
-function qa(q){openClaude(q);}
-function ckd(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();var msg=document.getElementById('cin').value.trim();if(msg)openClaude(msg);}}
+function qa(q){document.getElementById('cin').value=q;sendC();}
+function ckd(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendC();}}
 
-function buildPrompt(userQ){
-  var ctx='My health context: I am recovering from a Lisfranc foot injury (boot just came off, doing external PT/rehab). ';
-  ctx+='I am following a 16-week running plan from 0 to 21km (currently week '+(cwd()+1)+' of 16). ';
-  ctx+='I do 19-hour intermittent fasting with an eating window of 8am to 1pm. ';
-  ctx+='I weigh in every Sunday morning. ';
-  if(S.totalFasts>0)ctx+='I have completed '+S.totalFasts+' fasts, averaging '+(S.totalFastHours/S.totalFasts).toFixed(1)+' hours each. My current streak is '+S.streakDays+' days. ';
-  if(S.weights.length>0)ctx+='My current weight is '+S.weights[S.weights.length-1].val+'kg. ';
-  if(S.weightGoal)ctx+='My goal weight is '+S.weightGoal+'kg. ';
-  ctx+='\n\nMy question: '+userQ;
+function bctx(){
+  var ctx='You are a helpful health and fitness assistant built into FastTrack, a personal health app. ';
+  ctx+='User is recovering from a Lisfranc foot injury (boot came off recently, doing external PT/rehab). ';
+  ctx+='They follow a 16-week running plan from 0 to 21km. Currently on week '+(cwd()+1)+' of 16. ';
+  ctx+='They do 19-hour intermittent fasting (8am-1pm eating window). Sunday weigh-ins. ';
+  ctx+='Stats — Fasts: '+S.totalFasts+'. ';
+  if(S.totalFasts>0)ctx+='Avg fast: '+(S.totalFastHours/S.totalFasts).toFixed(1)+'h. Streak: '+S.streakDays+'d. ';
+  if(S.weights.length>0)ctx+='Weight: '+S.weights[S.weights.length-1].val+'kg. ';
+  if(S.weightGoal)ctx+='Goal: '+S.weightGoal+'kg. ';
+  ctx+='Be encouraging and concise. Under 150 words. Plain text, no markdown. Always say to consult physio for foot pain.';
   return ctx;
 }
 
-function openClaude(question){
-  var prompt=buildPrompt(question||'Give me personalised advice based on my health context above.');
-  var url='https://claude.ai/new?q='+encodeURIComponent(prompt);
-  window.open(url,'_blank');
-  closeC();
+async function sendC(){
+  if(cLoad)return;
+  var inp=document.getElementById('cin');
+  var msg=inp.value.trim();
+  if(!msg)return;
+  inp.value='';
+  addCmsg(msg,'user');
+  cHist.push({role:'user',content:msg});
+  cLoad=true;
+  document.getElementById('csend').disabled=true;
+  var typing=addCmsg('Thinking...','ai typing');
+  try{
+    var res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key':AKEY,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body:JSON.stringify({
+        model:'claude-haiku-4-5-20251001',
+        max_tokens:300,
+        system:bctx(),
+        messages:cHist
+      })
+    });
+    var data=await res.json();
+    var reply='Sorry, could not get a response. Please try again.';
+    if(data.content&&data.content[0]&&data.content[0].text)reply=data.content[0].text;
+    typing.textContent=reply;
+    typing.className='cmsg ai';
+    cHist.push({role:'assistant',content:reply});
+    if(cHist.length>20)cHist=cHist.slice(-20);
+  }catch(e){
+    typing.textContent='Error: '+e.message+'. Check console for details.';
+    typing.className='cmsg ai';
+  }
+  cLoad=false;
+  document.getElementById('csend').disabled=false;
+  scrollC();
 }
 
-// keep these for modal display (no-ops now)
-function addCmsg(text,cls){var msgs=document.getElementById('cmsgs');var el=document.createElement('div');el.className='cmsg '+cls;el.textContent=text;msgs.appendChild(el);scrollC();return el;}
+function addCmsg(text,cls){
+  var msgs=document.getElementById('cmsgs');
+  var el=document.createElement('div');
+  el.className='cmsg '+cls;
+  el.textContent=text;
+  msgs.appendChild(el);
+  scrollC();
+  return el;
+}
 function scrollC(){var msgs=document.getElementById('cmsgs');msgs.scrollTop=msgs.scrollHeight;}
 
 function init(){renderWater();updateFS();updateDash();if(!S.isFasting||!S.fastStart){document.getElementById('recB').classList.add('on');idleUI();}else{document.getElementById('recB').classList.remove('on');startUI();}}
